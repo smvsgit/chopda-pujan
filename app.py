@@ -6,6 +6,7 @@ import threading
 import time
 import os
 import re
+import uuid
 import bcrypt
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
@@ -57,9 +58,22 @@ if not SECRET_KEY:
         raise RuntimeError('SECRET_KEY environment variable is required.')
 app.config['SECRET_KEY'] = SECRET_KEY
 
-_default_db = 'postgresql://smvs:%s@localhost:5440/smvs_chopda' % quote_plus('smvs@2024')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', _default_db)
+DATABASE_URL = (os.environ.get('DATABASE_URL') or '').strip()
+if not DATABASE_URL:
+    if os.environ.get('FLASK_DEBUG') == '1':
+        DATABASE_URL = 'sqlite:////tmp/smvs_chopdapujan_dev.sqlite3'
+    else:
+        raise RuntimeError('DATABASE_URL environment variable is required.')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Seed credentials are required in production. Development keeps the historic
+# defaults only when FLASK_DEBUG=1; production must fail closed instead of
+# creating known-password accounts if Coolify secrets are missing.
+if os.environ.get('FLASK_DEBUG') != '1':
+    for _required_secret in ('ADMIN_PASSWORD', 'SANT_PASSWORD'):
+        if not os.environ.get(_required_secret):
+            raise RuntimeError(f'{_required_secret} environment variable is required.')
 # Small pool PER GUNICORN WORKER. 4 workers x (5+5) = 40 < Postgres default 100.
 # pool_pre_ping avoids "server closed the connection unexpectedly" after idle.
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
@@ -99,6 +113,67 @@ app.config['SESSION_COOKIE_NAME'] = os.environ.get('COOKIE_NAME', 'chopdapujan_s
 if os.environ.get('BEHIND_PROXY', '0') == '1':
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+# User-generated files are persisted on the SMVS media bind, not in the
+# container layer and not as new database BLOBs. In production MEDIA_ROOT is
+# /app/media, bind-mounted from /srv/media/projects/smvs-chopdapujan/media.
+MEDIA_ROOT = os.path.abspath(os.environ.get('MEDIA_ROOT', '/app/media'))
+
+
+def _media_path(relative_path):
+    """Return an absolute path below MEDIA_ROOT, rejecting path traversal."""
+    relative_path = (relative_path or '').replace('\\', '/').lstrip('/')
+    candidate = os.path.abspath(os.path.join(MEDIA_ROOT, relative_path))
+    if os.path.commonpath([MEDIA_ROOT, candidate]) != MEDIA_ROOT:
+        raise ValueError('Invalid media path')
+    return candidate
+
+
+def read_media_file(relative_path):
+    if not relative_path:
+        return None
+    try:
+        with open(_media_path(relative_path), 'rb') as fh:
+            return fh.read()
+    except FileNotFoundError:
+        return None
+
+
+def write_media_file(category, original_name, data):
+    """Atomically write bytes below MEDIA_ROOT and return the relative path."""
+    clean_category = '/'.join(
+        part for part in (category or '').replace('\\', '/').split('/')
+        if part and part not in ('.', '..')
+    )
+    if not clean_category:
+        raise ValueError('Media category is required')
+    ext = os.path.splitext(original_name or '')[1].lower()
+    if not re.fullmatch(r'\.[a-z0-9]{1,10}', ext or ''):
+        ext = ''
+    rel = f"{clean_category}/{uuid.uuid4().hex}{ext}"
+    path = _media_path(rel)
+    os.makedirs(os.path.dirname(path), mode=0o750, exist_ok=True)
+    tmp = path + '.tmp-' + uuid.uuid4().hex
+    try:
+        with open(tmp, 'wb') as fh:
+            fh.write(data)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+    return rel
+
+
+def delete_media_file(relative_path):
+    if not relative_path:
+        return
+    try:
+        os.unlink(_media_path(relative_path))
+    except FileNotFoundError:
+        pass
+
 
 db = SQLAlchemy(app)
 
@@ -1118,11 +1193,11 @@ class Instruction(db.Model):
 
 
 class ManualDoc(db.Model):
-    """A user manual, held in the database and served to whoever it is for.
+    """A user manual served to whoever it is for.
 
-    Stored as bytes rather than a path because the app runs in a container with
-    no persistent disk of its own - a file on the filesystem would vanish on the
-    next deploy, and a manual nobody can open is worse than no manual link.
+    New admin-uploaded PDFs live on the NAS-backed media bind. Legacy BLOB
+    columns remain readable so an existing installation can be migrated in a
+    controlled one-time step instead of losing access during cutover.
 
     Targeting works the same way as the instruction pages: user type, role and
     rights. That is what makes a centre volunteer and a Head Office volunteer
@@ -1136,7 +1211,8 @@ class ManualDoc(db.Model):
     about_gu = db.Column(db.String(400), default='')
     filename = db.Column(db.String(200), nullable=False, default='manual.pdf')
     mime = db.Column(db.String(80), default='application/pdf')
-    data = db.Column(db.LargeBinary)
+    data = db.Column(db.LargeBinary)  # legacy fallback; new uploads use file_path
+    file_path = db.Column(db.String(500), default='')
     size = db.Column(db.Integer, default=0)
     # The same manual in Gujarati, as its own file. Not a translated title over
     # an English PDF: a volunteer who reads Gujarati needs the pages in
@@ -1144,7 +1220,8 @@ class ManualDoc(db.Model):
     # Gujarati file has been uploaded the English one is served instead, so a
     # manual always opens.
     filename_gu = db.Column(db.String(200), default='')
-    data_gu = db.Column(db.LargeBinary)
+    data_gu = db.Column(db.LargeBinary)  # legacy fallback; new uploads use file_path_gu
+    file_path_gu = db.Column(db.String(500), default='')
     size_gu = db.Column(db.Integer, default=0)
     version_gu = db.Column(db.String(40), default='')
     # The manual as plain prose, one page per line, for reading aloud.
@@ -1207,17 +1284,17 @@ class ManualDoc(db.Model):
             'about_en': self.about, 'about_gu': self.about_gu or '',
             'filename': self.filename, 'mime': self.mime,
             'size_kb': round((self.size or 0) / 1024),
-            'has_gu': bool(self.data_gu),
+            'has_gu': bool(self.file_path_gu or self.data_gu),
             'size_gu_kb': round((self.size_gu or 0) / 1024),
             'version_gu': self.version_gu or '',
             # Which file this reader will actually be given, so the dialog can
             # say so rather than leaving them to find out.
-            'serves_gu': bool(self.data_gu) and lang == 'gu',
+            'serves_gu': bool(self.file_path_gu or self.data_gu) and lang == 'gu',
             'audience': self.audience, 'roles': self.roles,
             'any_perms': self.perms_any,
             'sort_order': self.sort_order, 'is_active': bool(self.is_active),
             'version': self.version or '',
-            'has_file': bool(self.data),
+            'has_file': bool(self.file_path or self.data),
             'uploaded_at': to_ist(self.uploaded_at, '%d-%m-%Y %H:%M'),
         }
 
@@ -1386,9 +1463,10 @@ class EventConfig(db.Model):
     body_ho_en = db.Column(db.Text, default=DEFAULT_TEMPLATES['ho_en'])
     subject_gu = db.Column(db.String(200), default='SMVS ચોપડા પૂજન {year}')
     subject_en = db.Column(db.String(200), default='SMVS Chopda-Pujan {year}')
-    # The poster lives in the database so it survives a container rebuild
-    # without needing a mounted volume.
+    # New poster uploads live on the NAS-backed media bind. poster_data remains
+    # only as a backwards-compatible fallback for databases from older builds.
     poster_data = db.Column(db.LargeBinary)
+    poster_path = db.Column(db.String(500), default='')
     poster_mime = db.Column(db.String(80))
     poster_name = db.Column(db.String(200))
     # Letting a member correct their own firm name, from a link in the
@@ -1432,7 +1510,7 @@ class EventConfig(db.Model):
             'selfserve_auto_add': bool(self.selfserve_auto_add),
             'selfserve_auto_edit': bool(self.selfserve_auto_edit),
             'selfserve_auto_email': bool(self.selfserve_auto_email),
-            'has_poster': bool(self.poster_data),
+            'has_poster': bool(self.poster_path or self.poster_data),
             'poster_name': self.poster_name or '',
             'updated_at': to_ist(self.updated_at),
         }
@@ -6243,8 +6321,23 @@ def api_upload_poster():
     if not mime.startswith('image/'):
         return jsonify({'error': 'That file is not an image'}), 400
     cfg = get_event_config(year)
-    cfg.poster_data, cfg.poster_mime, cfg.poster_name = data, mime, f.filename
-    db.session.commit()
+    old_path = cfg.poster_path or ''
+    try:
+        new_path = write_media_file(f'posters/{year}', f.filename, data)
+    except OSError as e:
+        app.logger.error('Poster media write failed: %s', e)
+        return jsonify({'error': 'Persistent media storage is not writable'}), 503
+    try:
+        cfg.poster_path = new_path
+        cfg.poster_data = None
+        cfg.poster_mime, cfg.poster_name = mime, (f.filename or '')[:200]
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        delete_media_file(new_path)
+        raise
+    if old_path and old_path != new_path:
+        delete_media_file(old_path)
     return jsonify({'success': True, 'config': cfg.to_dict()})
 
 
@@ -6252,8 +6345,12 @@ def api_upload_poster():
 @perm_required('event.config')
 def api_delete_poster():
     cfg = get_event_config(request.args.get('year', get_current_year(), type=int))
-    cfg.poster_data = cfg.poster_mime = cfg.poster_name = None
+    old_path = cfg.poster_path or ''
+    cfg.poster_data = None
+    cfg.poster_path = ''
+    cfg.poster_mime = cfg.poster_name = None
     db.session.commit()
+    delete_media_file(old_path)
     return jsonify({'success': True})
 
 
@@ -6261,9 +6358,12 @@ def api_delete_poster():
 @login_required
 def event_poster(year):
     cfg = EventConfig.query.filter_by(pujan_year=year).first()
-    if not cfg or not cfg.poster_data:
+    if not cfg:
         return jsonify({'error': 'No poster'}), 404
-    return Response(cfg.poster_data, mimetype=cfg.poster_mime or 'image/jpeg')
+    blob = read_media_file(cfg.poster_path) if cfg.poster_path else cfg.poster_data
+    if not blob:
+        return jsonify({'error': 'No poster'}), 404
+    return Response(blob, mimetype=cfg.poster_mime or 'image/jpeg')
 
 
 def _msg_context(cfg, member, lang, audience, year):
@@ -6429,11 +6529,14 @@ def event_poster(cfg, year):
     values to unpack (expected 3)" came from. Built in one place now, so the
     three senders cannot disagree about the shape again.
     """
-    if not cfg or not cfg.poster_data:
+    if not cfg:
+        return None
+    blob = read_media_file(cfg.poster_path) if cfg.poster_path else cfg.poster_data
+    if not blob:
         return None
     return (cfg.poster_name or f'chopda-pujan-{year}.jpg',
             cfg.poster_mime or 'image/jpeg',
-            cfg.poster_data)
+            blob)
 
 
 def center_accountant(center):
@@ -6980,10 +7083,10 @@ def seed_manuals():
         # A row with an English file already loaded is left alone, except that
         # a Gujarati twin shipped later is still picked up - otherwise adding
         # the Gujarati edition would mean deleting the manual first.
-        if row and row.data:
+        if row and (row.file_path or row.data):
             if os.path.exists(path):
                 changed = False
-                if not row.data_gu and seed_manual_gu(row, path):
+                if not (row.file_path_gu or row.data_gu) and seed_manual_gu(row, path):
                     changed = True
                     print('[init] Loaded the Gujarati edition of %r'
                           % spec['title'])
@@ -7035,9 +7138,12 @@ def manual_blob(doc, lang):
     English, because a manual that opens in the wrong language is still better
     than a broken link.
     """
-    if lang == 'gu' and doc.data_gu:
-        return doc.data_gu, (doc.filename_gu or 'manual-gu.pdf')
-    return doc.data, (doc.filename or 'manual.pdf')
+    if lang == 'gu' and (doc.file_path_gu or doc.data_gu):
+        blob = read_media_file(doc.file_path_gu) if doc.file_path_gu else doc.data_gu
+        if blob:
+            return blob, (doc.filename_gu or 'manual-gu.pdf')
+    blob = read_media_file(doc.file_path) if doc.file_path else doc.data
+    return blob, (doc.filename or 'manual.pdf')
 
 
 @app.route('/manual/<int:mid>')
@@ -7082,7 +7188,7 @@ def manual_text(mid):
     if not (doc.applies_to(user) or has_perm(user, 'manual.manage')):
         return jsonify({'error': 'That manual is not for your role'}), 403
     lang = request.args.get('lang') or session.get('lang') or user.language
-    served_gu = bool(lang == 'gu' and doc.data_gu)
+    served_gu = bool(lang == 'gu' and (doc.file_path_gu or doc.data_gu))
     stored = (doc.speech_gu if served_gu else doc.speech_en) or ''
     if stored.strip():
         pages = stored.split('\n')
@@ -7158,30 +7264,63 @@ def api_upload_manual():
                           f'{cap // 1024 // 1024} MB')
         return blob, None
 
+    new_paths = []
+    old_paths = []
     if f and f.filename:
         blob, err = read_pdf(f, 'English')
         if err:
             return jsonify({'error': err}), 400
-        doc.data = blob
+        try:
+            new_path = write_media_file('manuals', f.filename or 'manual.pdf', blob)
+        except OSError as e:
+            app.logger.error('Manual media write failed: %s', e)
+            return jsonify({'error': 'Persistent media storage is not writable'}), 503
+        new_paths.append(new_path)
+        if doc.file_path:
+            old_paths.append(doc.file_path)
+        doc.file_path = new_path
+        doc.data = None
         doc.size = len(blob)
         doc.filename = (f.filename or 'manual.pdf')[:200]
         doc.mime = 'application/pdf'
         doc.version = datetime.now(IST).strftime('%d-%m-%Y %H:%M')
         doc.uploaded_by = session['user_id']
-    elif not doc.data:
+    elif not (doc.file_path or doc.data):
         return jsonify({'error': 'Choose a PDF to upload'}), 400
 
     if f_gu and f_gu.filename:
         blob, err = read_pdf(f_gu, 'Gujarati')
         if err:
+            for path in new_paths:
+                delete_media_file(path)
             return jsonify({'error': err}), 400
-        doc.data_gu = blob
+        try:
+            new_path_gu = write_media_file('manuals', f_gu.filename or 'manual-gu.pdf', blob)
+        except OSError as e:
+            for path in new_paths:
+                delete_media_file(path)
+            app.logger.error('Manual media write failed: %s', e)
+            return jsonify({'error': 'Persistent media storage is not writable'}), 503
+        new_paths.append(new_path_gu)
+        if doc.file_path_gu:
+            old_paths.append(doc.file_path_gu)
+        doc.file_path_gu = new_path_gu
+        doc.data_gu = None
         doc.size_gu = len(blob)
         doc.filename_gu = (f_gu.filename or 'manual-gu.pdf')[:200]
         doc.version_gu = datetime.now(IST).strftime('%d-%m-%Y %H:%M')
         doc.uploaded_by = session['user_id']
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        for path in new_paths:
+            delete_media_file(path)
+        raise
+    for path in old_paths:
+        if path not in new_paths:
+            delete_media_file(path)
     audit('update' if mid else 'create', 'manual', doc, label=doc.title)
     db.session.commit()
     return jsonify({'success': True, 'manual': doc.to_dict('en')})
@@ -7200,9 +7339,12 @@ def api_manuals_all():
 @perm_required('manual.manage')
 def api_delete_manual(mid):
     doc = ManualDoc.query.get_or_404(mid)
+    paths = [p for p in (doc.file_path, doc.file_path_gu) if p]
     audit('delete', 'manual', doc, old={'title': doc.title}, label=doc.title)
     db.session.delete(doc)
     db.session.commit()
+    for path in paths:
+        delete_media_file(path)
     return jsonify({'success': True})
 
 
@@ -7485,7 +7627,7 @@ def api_comm_preview():
     return jsonify({'total': len(members), 'reachable': reachable,
                     'without_contact': len(members) - reachable,
                     'channel': channel, 'sample': sample, 'years': years,
-                    'poster': bool(tpl.include_poster and cfg and cfg.poster_data)})
+                    'poster': bool(tpl.include_poster and cfg and (cfg.poster_path or cfg.poster_data))})
 
 
 def _comm_years(d, year):
@@ -7942,7 +8084,7 @@ def api_notify_preview():
         'subject': subject, 'body': body,
         'total': len(members), 'with_email': with_email, 'with_whatsapp': with_phone,
         'email_configured': notify.email_configured(),
-        'has_poster': bool(cfg.poster_data),
+        'has_poster': bool(cfg.poster_path or cfg.poster_data),
         'placeholders': notify.placeholders_in(_template_for(cfg, lang, audience)),
     })
 
@@ -7988,10 +8130,7 @@ def api_notify_send():
     if not items:
         db.session.rollback()
         return jsonify({'error': 'None of those members have an email address'}), 400
-    attachment = None
-    if data.get('attach_poster', True) and cfg.poster_data:
-        attachment = (cfg.poster_name or f'chopda-pujan-{year}.jpg',
-                      cfg.poster_mime or 'image/jpeg', cfg.poster_data)
+    attachment = event_poster(cfg, year) if data.get('attach_poster', True) else None
     results = notify.send_emails(items, attachment=attachment)
     sent = failed = 0
     for r in results:
@@ -8717,6 +8856,9 @@ def init_db():
             "ALTER TABLE attendance ADD COLUMN IF NOT EXISTS darshan_by INTEGER",
             "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS filename_gu VARCHAR(200) DEFAULT ''",
             "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS data_gu BYTEA",
+            "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS file_path VARCHAR(500) DEFAULT ''",
+            "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS file_path_gu VARCHAR(500) DEFAULT ''",
+            "ALTER TABLE event_config ADD COLUMN IF NOT EXISTS poster_path VARCHAR(500) DEFAULT ''",
             "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS size_gu INTEGER DEFAULT 0",
             "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS version_gu VARCHAR(40) DEFAULT ''",
             "ALTER TABLE manuals ADD COLUMN IF NOT EXISTS speech_en TEXT",

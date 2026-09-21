@@ -1,0 +1,23 @@
+SMVS Coolify-ready transformation summary
+
+Database decision: MATCH-DB01
+- Detected repository DB: PostgreSQL 16 (original postgres:16-alpine service).
+- Production target: DB01 192.168.40.10:5432.
+- Removed local DB service and pgdata volume from production compose.
+- DATABASE_URL is now a required Coolify secret.
+
+Persistent media
+- Host: /srv/media/projects/smvs-chopdapujan/media
+- Container: /app/media
+- Runtime UID/GID pinned to 10001:10001.
+- New poster/manual uploads write to the NAS-backed bind.
+- Legacy DB BLOBs remain readable; optional explicit migration tool included.
+
+Security / operations
+- Sanitized .env.example; no production provider credentials are included.
+- Initial admin/sant passwords and SECRET_KEY are required production secrets.
+- Added explicit first-deploy DB_SCHEMA_MODE=bootstrap; default is none.
+- Added Alembic migration for media path columns.
+- Added DB01 provisioning template and deployment/verification/rollback guide.
+
+See SMVS_COOLIFY_DEPLOY.md for exact commands, expected results and STOP conditions.
