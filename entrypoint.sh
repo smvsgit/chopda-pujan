@@ -1,40 +1,53 @@
 #!/bin/sh
-# Container entrypoint. This file is what the Dockerfile has always pointed at;
-# it was missing from the project, so the image failed to build.
-set -e
+set -eu
 
 echo "=== SMVS Chopda-Pujan ==="
 
-# Wait for Postgres. depends_on/service_healthy usually covers this, but a
-# restart during a database upgrade can still race.
+# Wait for the approved external PostgreSQL service. This performs no schema
+# change and makes transient DB/network starts fail clearly.
 python - <<'PY'
 import os, sys, time
 from sqlalchemy import create_engine, text
 url = os.environ.get('DATABASE_URL')
 if not url:
-    print("DATABASE_URL is not set"); sys.exit(1)
+    print('DATABASE_URL is not set'); sys.exit(1)
 for attempt in range(1, 31):
     try:
-        create_engine(url).connect().execute(text('SELECT 1'))
-        print("Database reachable")
+        engine = create_engine(url, pool_pre_ping=True)
+        with engine.connect() as conn:
+            conn.execute(text('SELECT 1'))
+        print('Database reachable')
         break
     except Exception as e:
-        print(f"  waiting for database ({attempt}/30): {e.__class__.__name__}")
+        print(f'  waiting for database ({attempt}/30): {e.__class__.__name__}')
         time.sleep(2)
 else:
-    print("Database unreachable after 60s"); sys.exit(1)
+    print('Database unreachable after 60s'); sys.exit(1)
 PY
 
-echo "Running schema init / seed..."
-python -c "from app import init_db; init_db()"
+# Schema changes are explicit. For a brand-new, empty dedicated database set
+# DB_SCHEMA_MODE=bootstrap for the first controlled deployment only. After it
+# succeeds, set DB_SCHEMA_MODE=none. Do not use bootstrap on an existing DB
+# without reviewing its migration state first.
+case "${DB_SCHEMA_MODE:-none}" in
+  bootstrap)
+    echo "Applying Alembic schema to NEW EMPTY database..."
+    flask --app app db upgrade
+    echo "Running initial seed..."
+    python -c "from app import init_db; init_db()"
+    ;;
+  none)
+    echo "Schema mutation disabled (DB_SCHEMA_MODE=none)"
+    ;;
+  *)
+    echo "Invalid DB_SCHEMA_MODE: ${DB_SCHEMA_MODE}" >&2
+    exit 2
+    ;;
+esac
 
-# GUNICORN_RELOAD=1 makes gunicorn watch the source and restart its workers
-# when a .py file changes. Set by docker-compose.override.yml in development,
-# absent in production.
 RELOAD=""
 if [ "${GUNICORN_RELOAD:-0}" = "1" ]; then
     RELOAD="--reload"
-    echo "Live reload is ON - edit a .py file and gunicorn restarts itself."
 fi
 
 echo "Starting Gunicorn on :3000"

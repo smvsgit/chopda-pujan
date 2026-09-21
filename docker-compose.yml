@@ -1,39 +1,32 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-smvs_chopda}
-      POSTGRES_USER: ${POSTGRES_USER:-smvs}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
-    # The host port mapping is deliberately absent. The web service reaches
-    # the database over the compose network. Uncomment ONLY for local
-    # debugging with a GUI client, and never on a public host.
-    # ports:
-    #   - "127.0.0.1:5440:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smvs} -d ${POSTGRES_DB:-smvs_chopda}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
-
   web:
-    build: .
-    ports:
-      - "3000:3000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-smvs}:${POSTGRES_PASSWORD_URLENC:?set POSTGRES_PASSWORD_URLENC in .env}@db:5432/${POSTGRES_DB:-smvs_chopda}
-      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin@123}
-      SANT_PASSWORD: ${SANT_PASSWORD:-sant@123}
-      # Set to 1 once the app sits behind HTTPS.
-      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      # DB01 PostgreSQL 16. Keep the complete URL protected in Coolify.
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in Coolify secrets}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in Coolify secrets}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in Coolify secrets}
+      SANT_PASSWORD: ${SANT_PASSWORD:?set SANT_PASSWORD in Coolify secrets}
+
+      # First deployment against a NEW EMPTY dedicated DB: set to bootstrap.
+      # After successful bootstrap + verification, change to none and redeploy.
+      DB_SCHEMA_MODE: ${DB_SCHEMA_MODE:-none}
+      LEGACY_ALTERS: ${LEGACY_ALTERS:-0}
+
+      # NAS-backed user-generated media.
+      MEDIA_ROOT: /app/media
+
+      # Coolify HTTPS reverse proxy.
+      COOKIE_SECURE: ${COOKIE_SECURE:-1}
+      BEHIND_PROXY: ${BEHIND_PROXY:-1}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
       FLASK_DEBUG: "0"
 
-      # ---- Email ----
+      # Email
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -42,7 +35,7 @@ services:
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-SMVS Chopda-Pujan}
       SMTP_TLS: ${SMTP_TLS:-1}
 
-      # ---- SMS through TextGuru ----
+      # SMS through TextGuru
       TEXTGURU_LOGINID: ${TEXTGURU_LOGINID:-}
       TEXTGURU_PASSWORD: ${TEXTGURU_PASSWORD:-}
       TEXTGURU_SENDERID: ${TEXTGURU_SENDERID:-}
@@ -50,32 +43,33 @@ services:
       TEXTGURU_TEMPLATEID: ${TEXTGURU_TEMPLATEID:-}
       TEXTGURU_URL: ${TEXTGURU_URL:-https://www.textguru.in/api/sendsms.php}
 
-      # ---- WhatsApp Business API ----
+      # WhatsApp Business API
       WHATSAPP_API_KEY: ${WHATSAPP_API_KEY:-}
       WHATSAPP_FROM_NUMBER: ${WHATSAPP_FROM_NUMBER:-}
       WHATSAPP_BASE_URL: ${WHATSAPP_BASE_URL:-}
       WHATSAPP_SEND_PATH: ${WHATSAPP_SEND_PATH:-/messages}
       WHATSAPP_COUNTRY_CODE: ${WHATSAPP_COUNTRY_CODE:-91}
-      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-} 
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
 
-      # ---- Behaviour ----
+      # Behaviour
       CHECKIN_SMS: ${CHECKIN_SMS:-1}
       QR_LINK_DAYS: ${QR_LINK_DAYS:-120}
+      SELFSERVE_LINK_DAYS: ${SELFSERVE_LINK_DAYS:-180}
       SCHEDULER: ${SCHEDULER:-1}
       LOGIN_MAX_TRIES: ${LOGIN_MAX_TRIES:-8}
       LOGIN_LOCK_MINUTES: ${LOGIN_LOCK_MINUTES:-15}
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-12}
       APP_ROOT: ${APP_ROOT:-}
-      BEHIND_PROXY: ${BEHIND_PROXY:-0}
       COOKIE_NAME: ${COOKIE_NAME:-chopdapujan_session}
       DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-en}
-      # 1 keeps the old idempotent ALTERs running. Set to 0 once
-      # `flask db stamp head` has been run - see MIGRATIONS.md.
-      LEGACY_ALTERS: ${LEGACY_ALTERS:-0}
-    depends_on:
-      db:
-        condition: service_healthy
+    volumes:
+      - type: bind
+        source: /srv/media/projects/smvs-chopdapujan/media
+        target: /app/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
     restart: unless-stopped
-
-volumes:
-  pgdata:
