@@ -1,0 +1,3154 @@
+/* ======================== CSS VARIABLES ======================== */
+:root {
+    --saffron-deep: #8B1A00;
+    --saffron: #D4380D;
+    --saffron-light: #FF6B35;
+    --saffron-glow: #FF8C00;
+    --gold: #DAA520;
+    --gold-light: #FFD700;
+    --gold-pale: #FFF3C4;
+    --cream: #FFFAF0;
+    --cream-dark: #F5E6D3;
+    --brown-deep: #1A0A00;
+    --brown: #3E2723;
+    --brown-mid: #5D4037;
+    --brown-light: #6D5147;   /* darkened from #8D6E63: 4.5:1 on cream (WCAG AA) */
+    --success: #2E7D32;
+    --success-bg: #E8F5E9;
+    --danger: #C62828;
+    --danger-bg: #FFEBEE;
+    --warning: #E65100;
+    --warning-bg: #FFF3E0;
+    --info: #0277BD;
+    --info-bg: #E1F5FE;
+    --sidebar-w: 260px;
+    --header-h: 56px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+    --transition: .25s ease;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans Gujarati', 'Segoe UI', Tahoma, sans-serif;
+    background: var(--cream);
+    color: var(--brown);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ======================== SCROLLBAR ======================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--brown-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brown-mid); }
+
+/* ======================== SIDEBAR ======================== */
+.sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, #4A1500 0%, #6B1F00 25%, #8B2A00 55%, #A03000 80%, #B83800 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: transform .3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.35);
+}
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold), var(--gold-light), var(--gold));
+    background-size: 200% 100%;
+    animation: sidebar-shimmer 4s ease infinite;
+}
+@keyframes sidebar-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Sidebar Logo */
+.sidebar-header {
+    text-align: center;
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sidebar-logo {
+    text-align: center;
+    margin-bottom: 4px;
+    line-height: 0;
+}
+.sidebar-logo img {
+    height: 56px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(255,215,0,.35));
+    border-radius: 6px;
+}
+.sidebar-logo-fallback {
+    display: none;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 6px;
+    text-shadow: 0 0 20px rgba(255,215,0,.4), 0 2px 4px rgba(0,0,0,.3);
+    line-height: 56px;
+}
+.sidebar-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,.65);
+    letter-spacing: 1.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+    flex: 1;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 22px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    position: relative;
+}
+.nav-item:hover {
+    background: rgba(255,255,255,.07);
+    color: #fff;
+    padding-left: 26px;
+}
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(255,215,0,.12) 0%, transparent 100%);
+    color: var(--gold-light);
+    border-left-color: var(--gold-light);
+    font-weight: 600;
+}
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--gold-light);
+    border-radius: 3px 0 0 3px;
+}
+.nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 12px 16px 14px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    background: rgba(0,0,0,.15);
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--brown-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.user-name { font-size: 13px; font-weight: 600; color: #fff; }
+.user-role { font-size: 11px; color: rgba(255,255,255,.55); }
+.btn-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: var(--radius-sm);
+    color: rgba(255,255,255,.75);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all var(--transition);
+    cursor: pointer;
+    background: transparent;
+    font-family: inherit;
+}
+.btn-logout:hover {
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    border-color: rgba(255,255,255,.3);
+}
+
+/* ======================== MOBILE HEADER ======================== */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: linear-gradient(135deg, var(--saffron-deep), var(--saffron));
+    color: #fff;
+    align-items: center;
+    padding: 0 12px;
+    z-index: 999;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+}
+.hamburger {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background var(--transition);
+}
+.hamburger:hover { background: rgba(255,255,255,.1); }
+.mobile-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.mobile-logo-img {
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(255,215,0,.4));
+    border-radius: 3px;
+}
+.mobile-header-right { display: flex; align-items: center; gap: 8px; }
+.lang-toggle-mobile {
+    background: rgba(255,255,255,.15);
+    border: none;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background var(--transition);
+}
+.lang-toggle-mobile:hover { background: rgba(255,255,255,.25); }
+.mobile-logout { color: #fff; font-size: 18px; padding: 6px; }
+.mobile-logout:hover { color: var(--gold-light); }
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    /* Below .mobile-header (999) and .sidebar (1000): the tie at 999 was
+       previously resolved only by DOM order. */
+    z-index: 998;
+    backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active { display: block; }
+
+/* ======================== MAIN CONTENT ======================== */
+.main-content {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+}
+.page-header {
+    background: #fff;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--cream-dark);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04);
+    gap: 12px;
+}
+.page-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--saffron-deep);
+    white-space: nowrap;
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.page-body { padding: 24px 28px; }
+
+/* ======================== BUTTONS ======================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    text-decoration: none;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--saffron-deep), var(--saffron));
+    color: #fff;
+    border-color: var(--saffron);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--saffron), var(--saffron-light));
+    box-shadow: 0 4px 14px rgba(212,56,13,.35);
+    transform: translateY(-1px);
+}
+.btn-outline {
+    background: #fff;
+    color: var(--brown-mid);
+    border-color: var(--cream-dark);
+}
+.btn-outline:hover {
+    border-color: var(--saffron);
+    color: var(--saffron);
+    background: #fff;
+}
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; }
+.btn-lang {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.btn-icon {
+    width: 32px; height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all var(--transition);
+    background: transparent;
+    color: var(--brown-light);
+}
+.btn-icon:hover { background: var(--cream-dark); color: var(--brown); }
+.btn-edit:hover { background: var(--info-bg); color: var(--info); }
+.btn-delete:hover { background: var(--danger-bg); color: var(--danger); }
+.btn-view:hover { background: var(--success-bg); color: var(--success); }
+.btn-print:hover { background: var(--info-bg); color: var(--info); }
+
+/* ======================== CARDS ======================== */
+.card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+    overflow: hidden;
+}
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cream-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.card-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--brown);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card-header h3 i { color: var(--saffron); font-size: 16px; }
+.card-body { padding: 20px; }
+.mb-4 { margin-bottom: 20px; }
+.mt-4 { margin-top: 20px; }
+.ml-auto { margin-left: auto; }
+
+/* ======================== TABLES ======================== */
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.table thead th {
+    background: linear-gradient(135deg, #FFF5EE, #FFF8F2);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--brown-mid);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 2px solid var(--cream-dark);
+    white-space: nowrap;
+}
+.table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f5f0eb;
+    vertical-align: middle;
+}
+.table tbody tr:hover { background: #FFFBF5; }
+.table-striped tbody tr:nth-child(even) { background: #FDFBF8; }
+.table-striped tbody tr:nth-child(even):hover { background: #FFF5EE; }
+.table-sm td, .table-sm th { padding: 7px 10px; font-size: 12px; }
+.table tfoot td { border-top: 2px solid var(--cream-dark); }
+
+/* ======================== BADGES ======================== */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    white-space: nowrap;
+}
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-info { background: var(--info-bg); color: var(--info); }
+.badge-saffron { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: var(--saffron-deep); }
+.badge-gold { background: linear-gradient(135deg, #FFFDE7, #FFF9C4); color: #8D6E00; }
+
+/* ======================== STATS GRID ======================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.stat-info { flex: 1; min-width: 0; }
+.stat-value { font-size: 22px; font-weight: 800; line-height: 1.2; word-break: break-all; }
+.stat-label { font-size: 12px; color: var(--brown-light); margin-top: 2px; }
+
+.stat-saffron .stat-icon { background: #FFF3E0; color: var(--saffron); }
+.stat-saffron .stat-value { color: var(--saffron-deep); }
+.stat-gold .stat-icon { background: #FFFDE7; color: var(--gold); }
+.stat-gold .stat-value { color: #8D6E00; }
+.stat-green .stat-icon { background: #E8F5E9; color: var(--success); }
+.stat-green .stat-value { color: var(--success); }
+.stat-blue .stat-icon { background: #E3F2FD; color: var(--info); }
+.stat-blue .stat-value { color: var(--info); }
+.stat-emerald .stat-icon { background: #E0F2F1; color: #00796B; }
+.stat-emerald .stat-value { color: #00796B; }
+.stat-red .stat-icon { background: #FFEBEE; color: var(--danger); }
+.stat-red .stat-value { color: var(--danger); }
+.stat-purple .stat-icon { background: #F3E5F5; color: #7B1FA2; }
+.stat-purple .stat-value { color: #7B1FA2; }
+.stat-teal .stat-icon { background: #E0F7FA; color: #00838F; }
+.stat-teal .stat-value { color: #00838F; }
+
+.stat-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: #f0ece6;
+}
+.stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), #66BB6A);
+    border-radius: 0 2px 0 0;
+    transition: width .6s ease;
+}
+.bar-teal { background: linear-gradient(90deg, #00838F, #4DD0E1) !important; }
+
+/* ======================== DASHBOARD GRID ======================== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+/* The centre-wise summary is the widest thing on the page (6 columns plus a
+   progress bar) and was squeezed into a half-width column while the short
+   activity list got the full span. Swapped. */
+.dashboard-grid .card:first-child { grid-column: 1 / -1; }
+
+/* ======================== ACTIVITY ITEMS ======================== */
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f5f0eb;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--saffron);
+    flex-shrink: 0;
+    margin-top: 5px;
+    box-shadow: 0 0 6px rgba(212,56,13,.3);
+}
+.dot-green { background: var(--success) !important; box-shadow: 0 0 6px rgba(46,125,50,.3) !important; }
+.activity-content { flex: 1; min-width: 0; }
+.activity-content strong { font-size: 13px; }
+.activity-content .text-muted { font-size: 12px; }
+.amount-tag {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 10px;
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    color: var(--saffron-deep);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ======================== FILTER BAR ======================== */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+}
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brown-mid);
+    white-space: nowrap;
+}
+.filter-group select,
+.filter-group input {
+    padding: 7px 12px;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--brown);
+    background: #fff;
+    outline: none;
+    transition: border-color var(--transition);
+    min-width: 120px;
+}
+.filter-group select:focus,
+.filter-group input:focus {
+    border-color: var(--saffron);
+    box-shadow: 0 0 0 3px rgba(212,56,13,.08);
+}
+.flex-grow { flex: 1; min-width: 180px; }
+.filter-group.flex-grow input { width: 100%; }
+
+/* ======================== FORMS ======================== */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brown-mid);
+    margin-bottom: 5px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--cream-dark);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--brown-deep);
+    background: #fff;
+    outline: none;
+    transition: all var(--transition);
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--saffron);
+    box-shadow: 0 0 0 3px rgba(212,56,13,.08);
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+
+/* Tick boxes were picking up the text-input rule above - width:100%, 10px of
+   padding and a 2px border - so every checkbox in a dialog rendered as a
+   full-width empty box with its label stranded underneath. That is what made
+   the instruction and manual forms look broken. */
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: 3px;
+    accent-color: var(--saffron-deep);
+    box-shadow: none;
+}
+.form-group input[type="checkbox"]:focus,
+.form-group input[type="radio"]:focus {
+    box-shadow: 0 0 0 3px rgba(212,56,13,.15);
+}
+.form-group input[type="file"] { padding: 8px 10px; cursor: pointer; }
+.form-group input[readonly] { background: #f9f5f0; cursor: not-allowed; }
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--cream-dark);
+}
+
+/* ======================== MODAL ======================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,10,0,.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+}
+.modal-overlay.active {
+    display: flex;
+}
+.modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 0 1px rgba(218,165,32,.15);
+    animation: modalIn .25s ease;
+}
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(-20px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--cream-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--saffron-deep);
+}
+.modal-close {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--cream-dark);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--brown-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+}
+.modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+.modal-body {
+    padding: 22px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    flex: 1;
+}
+/* Save and Cancel stay on screen while a long form is scrolled - reaching
+   them used to mean scrolling past every checkbox first. */
+.modal-body > form > .form-actions,
+.modal-body > .form-actions {
+    position: sticky;
+    bottom: -22px;
+    margin-bottom: -22px;
+    padding: 14px 0;
+    background: #fff;
+    z-index: 4;
+}
+
+/* ======================== TOAST ======================== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    animation: toastIn .3s ease;
+    min-width: 280px;
+}
+.toast i { font-size: 16px; flex-shrink: 0; }
+.toast-success { background: linear-gradient(135deg, #2E7D32, #388E3C); }
+.toast-error { background: linear-gradient(135deg, #C62828, #D32F2F); }
+.toast-warning { background: linear-gradient(135deg, #E65100, #EF6C00); }
+.toast-info { background: linear-gradient(135deg, #0277BD, #0288D1); }
+.toast-out { animation: toastOut .4s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* ======================== LOADING ======================== */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--brown-light);
+}
+.spinner-large {
+    width: 40px; height: 40px;
+    border: 4px solid var(--cream-dark);
+    border-top-color: var(--saffron);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin-bottom: 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ======================== PROGRESS BARS ======================== */
+.mini-bar {
+    width: 80px; height: 6px;
+    background: #ede8e2;
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+.mini-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--saffron), var(--gold));
+    border-radius: 3px;
+    transition: width .6s ease;
+}
+.progress-bar {
+    width: 100%; height: 10px;
+    background: #ede8e2;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 6px 0;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), #66BB6A);
+    border-radius: 5px;
+    transition: width .6s ease;
+}
+
+/* ======================== SANKALP DETAIL ======================== */
+.sankalp-detail { margin-bottom: 16px; }
+.detail-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f0eb;
+    font-size: 14px;
+}
+.detail-row span { color: var(--brown-light); min-width: 120px; font-weight: 600; }
+
+/* ======================== CHECKBOX LIST ======================== */
+.checkbox-list {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background var(--transition);
+}
+.checkbox-item:hover { background: #FFF8F0; }
+.checkbox-item input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--saffron);
+    cursor: pointer;
+}
+
+/* ======================== CHECK-IN ======================== */
+.checkin-form { max-width: 500px; margin: 0 auto; }
+.checkin-input-group {
+    display: flex;
+    gap: 10px;
+}
+.checkin-input-group input { flex: 1; }
+.success-box {
+    background: var(--success-bg);
+    border: 1px solid #A5D6A7;
+    color: var(--success);
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: modalIn .3s ease;
+}
+.info-box {
+    background: var(--info-bg);
+    border: 1px solid #90CAF9;
+    color: var(--info);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+.info-box i { margin-right: 6px; }
+
+/* ======================== REPORTS GRID ======================== */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+.report-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,.04);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+    border-top: 3px solid transparent;
+}
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-top-color: var(--saffron);
+}
+.report-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    color: var(--saffron);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 14px;
+    transition: all var(--transition);
+}
+.report-card:hover .report-icon {
+    background: linear-gradient(135deg, var(--saffron), var(--saffron-light));
+    color: #fff;
+    transform: scale(1.08);
+}
+.report-card h3 { font-size: 14px; font-weight: 700; color: var(--brown); margin-bottom: 6px; }
+.report-card p { font-size: 12px; color: var(--brown-light); line-height: 1.5; }
+
+/* ======================== SUMMARY CARDS ======================== */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.summary-card {
+    background: linear-gradient(135deg, #FFF8F0, #FFF3E0);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+    border: 1px solid rgba(218,165,32,.15);
+}
+.sc-value { font-size: 22px; font-weight: 800; color: var(--saffron-deep); }
+.sc-label { font-size: 12px; color: var(--brown-mid); margin-top: 2px; }
+.sc-total { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+.sc-collected { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+.sc-collected .sc-value { color: var(--success); }
+.sc-pending { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+.sc-pending .sc-value { color: var(--danger); }
+.sc-center { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
+.sc-center .sc-value { color: var(--info); }
+
+/* ======================== PASS PRINT ======================== */
+.pass-print-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.pass-print-item {
+    border: 2px solid var(--saffron);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    background: #FFFBF5;
+}
+.pass-print-number {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--saffron-deep);
+    letter-spacing: 2px;
+}
+.pass-print-name { font-size: 13px; font-weight: 600; margin: 4px 0; }
+.pass-print-center { font-size: 11px; color: var(--brown-light); }
+
+.pass-number {
+    font-family: 'Courier New', monospace;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--saffron-deep);
+}
+
+/* ======================== TEXT UTILITIES ======================== */
+.text-muted { color: var(--brown-light) !important; }
+.text-sm { font-size: 12px !important; }
+.text-center { text-align: center !important; }
+.text-success { color: var(--success) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-primary { color: var(--saffron-deep) !important; }
+.text-warning { color: var(--warning) !important; }
+.font-bold { font-weight: 700 !important; }
+.py-4 { padding-top: 16px !important; padding-bottom: 16px !important; }
+
+/* ======================== ACTION BUTTONS IN TABLE ======================== */
+.action-btns {
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+/* ======================== RESPONSIVE ======================== */
+@media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .reports-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .dashboard-grid .card:first-child { grid-column: auto; }
+}
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-header { display: flex; }
+    /* BUGFIX: .mobile-header is position:fixed, so main content needs to be
+       pushed down by its height. Without this the page title sat underneath
+       the header until you scrolled. */
+    .main-content { margin-left: 0; padding-top: var(--header-h); }
+    .page-header { padding: 12px 16px; top: var(--header-h); }
+    body.nav-open { overflow: hidden; }
+    .page-body { padding: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 14px; }
+    .stat-value { font-size: 18px; }
+    .stat-icon { width: 38px; height: 38px; font-size: 15px; }
+    .reports-grid { grid-template-columns: 1fr 1fr; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-group { width: 100%; }
+    .filter-group select, .filter-group input { width: 100%; min-width: 0; }
+    .form-row { grid-template-columns: 1fr; }
+    .pass-print-grid { grid-template-columns: repeat(2, 1fr); }
+    .checkin-input-group { flex-direction: column; }
+    .summary-cards { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 16px; }
+    .modal { max-width: 95vw; margin: 10px; }
+    .modal-body { padding: 16px; }
+    .toast { min-width: auto; margin-left: 10px; }
+    .toast-container { right: 10px; left: 10px; }
+}
+@media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .reports-grid { grid-template-columns: 1fr; }
+    .pass-print-grid { grid-template-columns: 1fr; }
+    .stat-card { flex-direction: row; align-items: center; }
+    .stat-bar { display: none; }
+}
+
+/* ======================== TOGGLE SWITCH ======================== */
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .slider {
+    position: relative;
+    width: 42px; height: 23px;
+    background: #C7BDB3;
+    border-radius: 23px;
+    transition: background var(--transition);
+    flex-shrink: 0;
+}
+.switch .slider::before {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 17px; height: 17px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.switch input:checked + .slider { background: #14803C; }
+.switch input:checked + .slider::before { transform: translateX(19px); }
+.switch input:focus-visible + .slider { outline: 3px solid var(--gold); outline-offset: 2px; }
+.switch input:disabled + .slider { opacity: .5; cursor: not-allowed; }
+.switch-text { font-size: 12px; font-weight: 600; color: var(--brown-mid); }
+.switch-inline { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
+
+tr.row-inactive { opacity: .62; }
+tr.row-inactive strong { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* ======================== REPEATER BLOCKS ======================== */
+/* Firms and companies. Each card is one entity; the nested rows are its
+   partners or directors. */
+.repeat-card {
+    border: 1px solid var(--cream-dark);
+    border-left: 4px solid var(--saffron);
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px 16px 16px;
+    margin-bottom: 14px;
+}
+.repeat-head {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; font-size: 14px; color: var(--saffron-deep);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px dashed var(--cream-dark);
+}
+.repeat-head span { margin-right: auto; }
+
+.repeat-sub {
+    margin-top: 6px; padding: 12px;
+    background: var(--cream);
+    border-radius: 10px;
+}
+.repeat-sub-title {
+    font-size: 12px; font-weight: 700; letter-spacing: .4px;
+    text-transform: uppercase; color: var(--brown-mid); margin-bottom: 8px;
+}
+.person-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.3fr .9fr auto;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+.person-row input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--cream-dark);
+    border-radius: 8px;
+    font-family: inherit; font-size: 13px;
+    background: #fff; color: var(--brown-deep);
+    min-width: 0;
+}
+.person-row input:focus { border-color: var(--saffron); outline: none; }
+
+.btn-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--cream-dark);
+    border-radius: 8px;
+    background: #fff;
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    color: var(--brown-mid);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.btn-chip:hover { border-color: var(--saffron); color: var(--saffron); }
+.btn-chip.danger { color: #B03030; padding: 7px 9px; }
+.btn-chip.danger:hover { border-color: #B03030; background: #FEF2F2; color: #8B1A1A; }
+
+.add-other { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.field-hint { display: block; margin-top: 4px; font-size: 11.5px; color: var(--brown-mid); }
+.input-with-btn { display: flex; gap: 6px; align-items: stretch; }
+.input-with-btn input { flex: 1; min-width: 0; }
+.input-with-btn .btn-chip { flex-shrink: 0; padding: 0 12px; }
+
+/* The member form is tall - give it more room than the default modal. */
+.modal { max-width: 720px; }
+
+@media (max-width: 768px) {
+    /* Stack the partner/director row into a labelled block on phones. */
+    .person-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid var(--cream-dark);
+        border-radius: 8px;
+        background: #fff;
+        margin-bottom: 8px;
+    }
+    .person-row .btn-chip.danger { justify-self: end; }
+    .repeat-card { padding: 12px; }
+}
+
+/* ======================== TYPE COMPOSITION CHIPS ======================== */
+.chip-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.chip-count {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.chip-count i { font-size: 10px; }
+.chip-firm    { background: var(--gold-pale); color: #7A5A00; }
+.chip-company { background: #E3F0FF;          color: #17457A; }
+
+.sk-secondary { line-height: 1.5; }
+.cross-badge { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 10.5px; }
+
+/* Where a pledge lands: the collecting centre, and the firm behind it. */
+.collect-note {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; margin-bottom: 16px;
+    border-radius: 10px;
+    background: var(--gold-pale);
+    border-left: 4px solid var(--gold);
+}
+.collect-note.cross { background: #FFF0E6; border-left-color: var(--saffron); }
+.collect-note i { font-size: 19px; color: var(--saffron-deep); flex-shrink: 0; }
+.collect-note strong { display: block; font-size: 13.5px; color: var(--brown); }
+.collect-note span { display: block; font-size: 12px; color: var(--brown-mid); margin-top: 2px; }
+
+.sub-hint { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--brown-light); }
+
+/* The partner row gained a centre dropdown - six columns now. */
+.person-row { grid-template-columns: 1.3fr .9fr .9fr 1.2fr .8fr 1.1fr auto; }
+.person-row select {
+    width: 100%; min-width: 0;
+    padding: 8px 6px;
+    border: 1px solid var(--cream-dark); border-radius: 8px;
+    font-family: inherit; font-size: 12px;
+    background: #fff; color: var(--brown-deep);
+}
+.person-row select:focus { border-color: var(--saffron); outline: none; }
+@media (max-width: 768px) { .person-row { grid-template-columns: 1fr; } }
+
+/* ======================== MEMBER ID ======================== */
+.mem-code, .mem-code-cell {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: .3px; color: var(--brown-mid);
+}
+.mem-code { display: block; margin-bottom: 1px; }
+.mem-code-cell {
+    display: inline-block;
+    padding: 2px 7px; border-radius: 5px;
+    background: var(--cream-dark); color: var(--brown);
+    white-space: nowrap;
+}
+
+/* Collecting Center only lights up when it differs from the primary. */
+.cross-cell {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 6px;
+    background: #FFF0E6; color: var(--saffron-deep);
+    font-weight: 600; font-size: 12px; white-space: nowrap;
+}
+.cross-cell i { font-size: 10px; }
+
+/* ======================== IMPORT / EXPORT ======================== */
+.io-block {
+    border: 1px solid var(--cream-dark);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    background: #fff;
+}
+.io-title {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; font-size: 14px; color: var(--saffron-deep);
+    margin-bottom: 6px;
+}
+.io-text { font-size: 12.5px; color: var(--brown-mid); margin-bottom: 12px; line-height: 1.5; }
+.io-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+#ioFile {
+    display: block; width: 100%;
+    padding: 10px;
+    border: 2px dashed var(--cream-dark);
+    border-radius: 10px;
+    background: var(--cream);
+    font-family: inherit; font-size: 13px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+#ioFile:hover { border-color: var(--saffron); }
+
+.io-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    background: var(--cream-dark); color: var(--brown);
+    margin-bottom: 10px;
+}
+.io-status.good { background: #E7F6EC; color: #14803C; }
+.io-status.bad  { background: #FEF2F2; color: #9B1C1C; }
+
+.io-errors {
+    max-height: 190px; overflow-y: auto;
+    border: 1px solid #FECACA; border-radius: 8px;
+    padding: 10px 12px; margin-bottom: 12px;
+    background: #FFFBFB;
+    font-size: 12.5px; line-height: 1.7;
+}
+.io-errors b { color: #9B1C1C; }
+
+/* ======================== READ-ONLY DETAIL CARD ======================== */
+/* Used where centre staff may look but not edit. */
+.ro-card {
+    border: 1px solid var(--cream-dark);
+    border-left: 4px solid var(--brown-light);
+    border-radius: 10px;
+    background: var(--cream);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+.ro-title {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .4px;
+    color: var(--brown-mid);
+    margin-bottom: 9px; padding-bottom: 7px;
+    border-bottom: 1px dashed var(--cream-dark);
+}
+.ro-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 16px; padding: 5px 0; font-size: 13px;
+}
+.ro-row + .ro-row { border-top: 1px dotted rgba(0,0,0,.06); }
+.ro-row span { color: var(--brown-mid); flex-shrink: 0; }
+.ro-row strong { color: var(--brown-deep); text-align: right; overflow-wrap: anywhere; }
+.ro-remark {
+    font-size: 12px; color: var(--brown-mid);
+    padding: 0 0 7px 10px; border-left: 2px solid var(--gold);
+    margin: 0 0 4px 2px; font-style: italic;
+}
+
+/* ==================== TOASTS: CENTRED, CLEAR OF THE MENU ==================== */
+/* Anchored top-centre over the content area rather than the top-right corner,
+   where they were covering the page's own action buttons. */
+.toast-container {
+    position: fixed !important;
+    top: 16px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    z-index: 4000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    width: max-content;
+    max-width: min(92vw, 520px);
+}
+.toast {
+    pointer-events: auto;
+    margin: 0 !important;
+    min-width: 0 !important;
+    animation: toast-drop .25s ease;
+}
+.toast.toast-out { animation: toast-lift .3s ease forwards; }
+@keyframes toast-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes toast-lift { to { opacity: 0; transform: translateY(-14px); } }
+
+@media (max-width: 768px) {
+    .toast-container { top: calc(var(--header-h) + 10px) !important; left: 50% !important; right: auto !important; }
+}
+
+/* A select the layout still needs but the user should not see. */
+.hidden-field { display: none !important; }
+
+.btn-icon.btn-carry:hover { color: var(--gold); }
+
+/* Partner row lost designation and PAN, gained Member ID: five columns. */
+.person-row { grid-template-columns: .9fr 1.3fr 1fr 1.3fr 1.1fr auto; }
+@media (max-width: 768px) { .person-row { grid-template-columns: 1fr; } }
+
+/* ======================== HEAD OFFICE / NOTIFICATIONS ======================== */
+.ho-switch .slider { width: 36px; height: 20px; }
+.ho-switch .slider::before { width: 14px; height: 14px; }
+.ho-switch input:checked + .slider { background: var(--saffron); }
+.ho-switch input:checked + .slider::before { transform: translateX(16px); }
+tr.row-ho { background: linear-gradient(90deg, rgba(218,165,32,.13), transparent 60%); }
+tr.row-ho td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+
+.ho-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.ho-stat {
+    flex: 1 1 120px; min-width: 110px;
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--cream); border: 1px solid var(--cream-dark);
+    text-align: center;
+}
+.ho-stat strong { display: block; font-size: 22px; color: var(--saffron-deep); line-height: 1.1; }
+.ho-stat span   { display: block; font-size: 11.5px; color: var(--brown-mid); margin-top: 3px; }
+.ho-stat small  { display: block; font-size: 10.5px; color: var(--brown-light); margin-top: 2px; }
+
+.bc-table { max-height: 260px; overflow-y: auto; margin-bottom: 12px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--cream-dark); margin-bottom: 16px; flex-wrap: wrap; }
+.tab {
+    padding: 9px 16px; border: none; background: transparent;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    color: var(--brown-mid); cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.tab:hover { color: var(--saffron); }
+.tab.active { color: var(--saffron-deep); border-bottom-color: var(--saffron); }
+
+.msg-subject {
+    font-weight: 700; font-size: 13px; color: var(--brown-deep);
+    padding-bottom: 7px; margin-bottom: 7px;
+    border-bottom: 1px dashed var(--cream-dark);
+}
+.msg-body {
+    font-family: inherit; font-size: 12.5px; line-height: 1.65;
+    white-space: pre-wrap; word-break: break-word;
+    color: var(--brown); margin: 0; max-height: 260px; overflow-y: auto;
+}
+
+.poster-box { position: relative; display: inline-block; margin-bottom: 10px; }
+.poster-box img {
+    max-width: 190px; max-height: 250px;
+    border-radius: 8px; border: 1px solid var(--cream-dark); display: block;
+}
+.poster-box .btn-chip { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,.94); }
+
+.wa-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--cream-dark); border-radius: 10px; }
+.wa-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; text-decoration: none; color: var(--brown-deep);
+    border-bottom: 1px solid var(--cream-dark); font-size: 13px;
+}
+.wa-row:last-child { border-bottom: none; }
+.wa-row:hover { background: var(--cream); }
+.wa-row .wa-name { font-weight: 600; margin-right: auto; }
+.wa-row small { color: var(--brown-mid); }
+.wa-row .fa-whatsapp { color: #25D366; font-size: 17px; }
+
+.section-sub {
+    margin: 22px 0 10px; font-size: 14px; font-weight: 700;
+    color: var(--saffron-deep);
+    padding-bottom: 6px; border-bottom: 1px dashed var(--cream-dark);
+}
+
+/* ==================== CHECK-IN NUMBER PEEK ==================== */
+/* Confirms who a number belongs to while it is being typed. */
+.center-hint { text-align: center; margin-top: 8px; }
+.pass-peek {
+    display: none;
+    margin: 12px auto 0;
+    max-width: 480px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    text-align: center;
+}
+.pass-peek:not(:empty) { display: block; }
+.pass-peek small { display: block; font-size: 12px; opacity: .85; margin-top: 3px; }
+.pass-peek.ok   { background: #E7F6EC; color: #14803C; border: 1px solid #B7E3C6; }
+.pass-peek.used { background: var(--gold-pale); color: #7A5A00; border-color: var(--gold); }
+.pass-peek.miss { background: var(--cream-dark); color: var(--brown-mid); }
+.pass-peek strong { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; }
+
+.badge-saffron { background: var(--saffron-deep); color: #fff; }
+
+/* ==================== NUMERIC COLUMNS ==================== */
+/* Money and counts right-align so the digits stack and totals read down the
+   column. Applies to every table: members, sankalp, reports, dashboard. */
+.table th.num,
+.table td.num,
+.table tfoot tr.num-row td:not(:first-child) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.table td.num small { font-variant-numeric: normal; }
+@media (max-width: 768px) {
+    /* Stacked cards put the label left and the value right already. */
+    .table-stack td.num { text-align: right; }
+}
+
+/* Member ID reads at the same weight as the name it sits beside. */
+.mem-code-cell {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    padding: 3px 9px;
+    color: var(--brown-deep);
+}
+.mem-code { font-size: 12.5px; font-weight: 700; }
+
+.chip-count[title] { cursor: help; }
+
+/* ==================== PASS CANDIDATE LIST ==================== */
+.list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.list-head label { margin: 0; }
+.list-count { margin-left: auto; font-size: 12px; color: var(--brown-mid); font-weight: 600; }
+
+.checkbox-list { max-height: 320px; overflow-y: auto; }
+.checkbox-item {
+    display: grid;
+    grid-template-columns: auto 88px 1fr 130px 110px auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--cream-dark);
+    cursor: pointer;
+    font-size: 13px;
+}
+.checkbox-item:last-child { border-bottom: none; }
+.checkbox-item:hover { background: var(--cream); }
+.checkbox-item.done { opacity: .62; cursor: not-allowed; background: var(--cream); }
+.ci-code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 700;
+    background: var(--cream-dark); color: var(--brown);
+    padding: 2px 7px; border-radius: 5px; text-align: center;
+}
+.ci-name   { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ci-center { font-size: 12px; color: var(--brown-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ci-amt    { text-align: right; font-weight: 700; color: var(--saffron-deep); font-variant-numeric: tabular-nums; }
+.ci-amt small { font-weight: 400; color: var(--brown-mid); }
+.ci-tag {
+    font-size: 10.5px; font-weight: 700; white-space: nowrap;
+    padding: 2px 7px; border-radius: 8px;
+}
+.ci-tag.issued { background: #E7F6EC; color: #14803C; }
+.ci-tag.other  { background: var(--cream-dark); color: var(--brown-mid); }
+.ci-tag.ho     { background: var(--gold-pale); color: #7A5A00; }
+
+@media (max-width: 768px) {
+    .checkbox-item {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas: 'chk name amt' 'chk meta tag';
+        row-gap: 2px;
+    }
+    .checkbox-item > input { grid-area: chk; }
+    .ci-code   { grid-area: meta; justify-self: start; }
+    .ci-name   { grid-area: name; }
+    .ci-center { display: none; }
+    .ci-amt    { grid-area: amt; }
+    .ci-tag    { grid-area: tag; justify-self: end; }
+}
+
+/* ==================== MOBILE POLISH ==================== */
+/* The stacked-card table gained an At-HO toggle column and a Member ID that
+   should lead the card rather than sit in the middle of it. */
+@media (max-width: 768px) {
+    /* Member ID heads the card; the toggle sits top-right. */
+    .table-stack td[data-label] .mem-code-cell { font-size: 13px; }
+    .table-stack td .switch { justify-content: flex-end; }
+
+    /* Filter bars wrap instead of squeezing every control onto one line. */
+    .filter-bar { flex-wrap: wrap; gap: 10px; }
+    .filter-group { flex: 1 1 46%; min-width: 140px; }
+    .filter-group.flex-grow { flex: 1 1 100%; }
+
+    /* Page header actions stack full width so nothing is half off-screen. */
+    .header-actions { flex-wrap: wrap; gap: 8px; width: 100%; }
+    .header-actions .btn { flex: 1 1 auto; justify-content: center; }
+    .page-header { flex-wrap: wrap; gap: 10px; }
+
+    /* Modals use the whole screen; a 720px form in a 380px viewport was
+       scrolling sideways. */
+    .modal { max-width: 100%; width: 100%; margin: 0; border-radius: 14px 14px 0 0; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal-body { max-height: 82vh; }
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Every input at 16px so iOS stops zooming the page on focus. */
+    input, select, textarea { font-size: 16px !important; }
+
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab { white-space: nowrap; }
+
+    .ho-stats { gap: 8px; }
+    .ho-stat { flex: 1 1 45%; }
+
+    /* Touch targets: 44px is the accessible minimum. */
+    .btn, .btn-icon, .btn-chip { min-height: 44px; }
+    .btn-icon { min-width: 44px; }
+    .action-btns { gap: 6px; }
+}
+
+@media (max-width: 420px) {
+    .header-actions .btn span,
+    .header-actions .btn { font-size: 13px; }
+    .ho-stat { flex: 1 1 100%; }
+}
+
+/* A paged list scrolls inside its own box, so the pager below it stays on
+   screen instead of being pushed off the bottom by 20 rows. */
+.paged-wrap {
+    max-height: min(62vh, 620px);
+    overflow: auto;
+}
+/* The card must not clip the sticky pager. */
+.card-body:has(> .pager) { overflow: visible; }
+.paged-wrap .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    box-shadow: 0 1px 0 var(--cream-dark);
+}
+@media (max-width: 768px) {
+    .paged-wrap { max-height: 58vh; }
+    /* Stacked cards are taller, so the sticky header has nothing to stick to. */
+    .paged-wrap .table-stack thead th { position: static; }
+}
+
+/* ==================== SORTING & PAGINATION ==================== */
+.sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+.sortable-th:hover { color: var(--saffron-deep); }
+.sort-ico { margin-left: 5px; font-size: 10px; opacity: .35; }
+.sortable-th.sorted .sort-ico { opacity: 1; color: var(--saffron); }
+.sortable-th:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+
+/* Sticky at the bottom of the card, so the page numbers are reachable no
+   matter how far down the list you have scrolled. */
+.pager {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 10px; padding: 10px 6px; flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: linear-gradient(to top, var(--cream-light) 70%, rgba(255,251,245,.85));
+    border-top: 1px solid var(--cream-dark);
+    margin-top: 0;
+}
+.pager:empty { display: none; }
+.pager-info { margin-right: auto; font-size: 12.5px; color: var(--brown-mid); }
+.pager-pos { font-size: 13px; font-weight: 600; color: var(--brown); min-width: 54px; text-align: center; }
+.pager .btn-chip[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* ==================== ACTIVITY LOG ==================== */
+.audit-filters { align-items: flex-end; }
+.audit-filters label { display: block; font-size: 11.5px; font-weight: 600; color: var(--brown-mid); margin-bottom: 3px; }
+.nowrap { white-space: nowrap; }
+
+.chg-list { display: flex; flex-direction: column; gap: 3px; }
+.chg {
+    display: flex; align-items: baseline; gap: 6px;
+    font-size: 12px; flex-wrap: wrap;
+}
+.chg-f {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11px; font-weight: 700; color: var(--brown-mid);
+    min-width: 92px;
+}
+.chg-o { color: #9B1C1C; text-decoration: line-through; text-decoration-thickness: 1px; }
+.chg-n { color: #14803C; font-weight: 600; }
+.chg .fa-arrow-right { font-size: 9px; color: var(--brown-light); }
+
+@media (max-width: 768px) {
+    .chg-f { min-width: 0; }
+    .pager { justify-content: center; }
+    .pager-info { margin-right: 0; width: 100%; text-align: center; }
+}
+
+/* The fast-entry grid needs more room than a normal dialog. */
+.modal.modal-wide { max-width: 1120px; }
+@media (max-width: 1180px) { .modal.modal-wide { max-width: 96vw; } }
+
+/* ==================== FAST ENTRY GRID ==================== */
+/* A typing grid, not a form: dense rows, no per-field labels, Tab and Enter
+   move between cells. Column widths are fixed so Name gets real room. */
+.fe-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.fe-top .io-text { margin: 0; flex: 1; }
+.fe-top .btn { flex-shrink: 0; white-space: nowrap; }
+.fe-badge {
+    display: inline-block; min-width: 20px; padding: 1px 6px;
+    border-radius: 10px; background: var(--saffron); color: #fff;
+    font-size: 11px; font-weight: 700; margin-left: 4px;
+}
+
+.fe-wrap {
+    max-height: 46vh;
+    overflow: auto;
+    border: 1px solid var(--cream-dark);
+    border-radius: 10px;
+    background: #fff;
+}
+/* Auto layout, not fixed. Under `table-layout: fixed` a column's min-width is
+   ignored, so once the fixed columns added up to more than the dialog the
+   auto-width Name column was squeezed to nothing and disappeared. The table
+   now has a floor and the wrapper scrolls if the dialog is narrower. */
+.fe-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+.fe-member { min-width: 880px; }
+.fe-sankalp { min-width: 620px; }
+.fe-table thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--cream-dark);
+    color: var(--brown);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .3px;
+    padding: 7px 8px; text-align: left; white-space: nowrap;
+}
+.fe-table thead th.num { text-align: right; }
+.fe-table td { padding: 3px 4px; border-bottom: 1px solid var(--cream); vertical-align: middle; }
+.fe-table tr:last-child td { border-bottom: none; }
+.fe-table tr:hover td { background: var(--cream); }
+.fe-n { text-align: center; font-size: 11px; color: var(--brown-light); font-variant-numeric: tabular-nums; }
+
+/* Name is the field people actually type into, so it gets the space. */
+.fe-member .c-n    { width: 38px;  min-width: 38px; }
+.fe-member .c-code { width: 104px; min-width: 104px; }
+.fe-member .c-name { width: 28%;   min-width: 230px; }
+.fe-member .c-mob  { width: 118px; min-width: 118px; }
+.fe-member .c-type { width: 118px; min-width: 118px; }
+.fe-member .c-biz  { width: 24%;   min-width: 180px; }
+.fe-member .c-ctr  { width: 136px; min-width: 130px; }
+.fe-member .c-act  { width: 78px;  min-width: 78px; }
+
+.fe-sankalp .c-n    { width: 38px;  min-width: 38px; }
+.fe-sankalp .c-code { width: 200px; min-width: 190px; }
+.fe-sankalp .c-name { width: 40%;   min-width: 230px; }
+.fe-sankalp .c-amt  { width: 140px; min-width: 130px; }
+.fe-sankalp .c-act  { width: 42px;  min-width: 42px; }
+
+.fe-table input,
+.fe-table select {
+    width: 100%; min-width: 0;
+    padding: 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    font-family: inherit; font-size: 13.5px;
+    color: var(--brown-deep);
+}
+.fe-table .c-name input { font-size: 14px; font-weight: 600; }
+.fe-table input.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.fe-table input:hover, .fe-table select:hover { border-color: var(--cream-dark); }
+.fe-table input:focus, .fe-table select:focus {
+    outline: none;
+    border-color: var(--saffron);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(212,56,13,.1);
+}
+.fe-table input:disabled { background: var(--cream); color: var(--brown-light); cursor: not-allowed; }
+.fe-table .c-act { white-space: nowrap; }
+.fe-table .c-act .btn-chip { padding: 6px 8px; }
+
+/* A row added by the + button: same person, another business. */
+.fe-child td { background: var(--gold-pale) !important; }
+.fe-child .c-code input, .fe-child .c-name input, .fe-child .c-mob input { opacity: .65; }
+
+.fe-hit  { display: block; font-size: 10.5px; color: #14803C; padding: 0 8px 2px; font-weight: 600; }
+.fe-prev { display: block; font-size: 10.5px; color: var(--saffron-deep); padding: 0 8px 2px; font-weight: 600; }
+.fe-miss { display: block; font-size: 10.5px; color: #9B1C1C; padding: 0 8px 2px; }
+.fe-bad td { background: #FFF6F6; }
+
+.fe-actions { display: flex; align-items: center; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
+.fe-summary { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--saffron-deep); }
+
+.fe-done { max-height: 240px; overflow-y: auto; border: 1px solid var(--cream-dark); border-radius: 8px; margin-top: 8px; }
+.fe-hide { margin-left: auto; }
+#feList .io-status { display: flex; align-items: center; gap: 8px; }
+#feListBtn.active { background: var(--saffron); color: #fff; border-color: var(--saffron); }
+.fe-done .table { margin: 0; font-size: 12.5px; }
+
+@media (max-width: 768px) {
+    .fe-top { flex-direction: column; }
+    .fe-top .btn { width: 100%; }
+    .fe-wrap { max-height: 52vh; }
+    /* Horizontal scroll beats squeezing seven inputs into 380px. */
+    .fe-member { min-width: 880px; }
+    .fe-sankalp { min-width: 620px; }
+    .fe-summary { margin-left: 0; width: 100%; }
+}
+
+/* A field switched off because the chosen role makes it meaningless. */
+select.is-disabled, input.is-disabled {
+    background: var(--cream);
+    color: var(--brown-light);
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+/* ==================== PERMISSIONS EDITOR ==================== */
+.perm-btn { white-space: nowrap; font-weight: 600; }
+.perm-btn:hover { border-color: var(--saffron); color: var(--saffron); }
+.perm-count {
+    display: inline-block; padding: 1px 6px; border-radius: 8px;
+    background: var(--cream-dark); color: var(--brown-mid);
+    font-size: 11px; font-variant-numeric: tabular-nums;
+}
+
+.perm-group { margin-bottom: 16px; }
+.perm-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .4px; color: var(--saffron-deep);
+    padding-bottom: 6px; margin-bottom: 8px;
+    border-bottom: 1px dashed var(--cream-dark);
+}
+.perm-head .btn-chip { padding: 3px 9px; font-size: 11px; min-height: 0; margin-left: 0; }
+.perm-head .btn-chip:first-of-type { margin-left: auto; }
+.perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 14px; }
+.perm-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 8px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; font-size: 13px;
+}
+.perm-item:hover { background: var(--cream); }
+.perm-item.changed { background: var(--gold-pale); border-color: var(--gold); }
+.perm-label { line-height: 1.3; }
+.perm-label small { display: block; font-size: 10.5px; color: var(--brown-mid); }
+
+/* The Year control that both fast-entry grids share. */
+.fe-year { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.fe-year label { font-size: 12px; font-weight: 700; color: var(--brown-mid); }
+.fe-year select {
+    padding: 7px 10px; border: 1px solid var(--cream-dark); border-radius: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 600; background: #fff;
+}
+.fe-year .field-hint { margin: 0; }
+
+@media (max-width: 768px) { .perm-grid { grid-template-columns: 1fr; } }
+
+/* ======================== ACCESSIBILITY ======================== */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 4000;
+    background: var(--saffron-deep);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 0 0 8px 0;
+    font-weight: 600;
+}
+.skip-link:focus { left: 0; }
+
+/* A visible keyboard focus ring everywhere. Mouse users never see it. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ======================== CHECK-IN VERDICT ======================== */
+/* Full-width, high-contrast result panel. A volunteer at the gate reads this
+   at arm's length with a queue waiting, so it is deliberately loud. */
+.checkin-verdict {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    color: #fff;
+    animation: verdict-in .25s ease;
+}
+.checkin-verdict:empty { display: none; }
+.checkin-verdict i { font-size: 40px; flex-shrink: 0; }
+.checkin-verdict strong { display: block; font-size: 22px; line-height: 1.25; }
+.checkin-verdict span { display: block; font-size: 14px; opacity: .9; margin-top: 2px; }
+.checkin-verdict.ok   { background: linear-gradient(135deg, #14803C, #1BA84E); }
+.checkin-verdict.fail { background: linear-gradient(135deg, #9B1C1C, #C62828); }
+@keyframes verdict-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ==================== CHECK-IN: SCANNER + KEYPAD ==================== */
+.scanner-box {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 3px solid var(--gold);
+    background: #000;
+    aspect-ratio: 4 / 3;
+    position: relative;
+}
+/* The library nests a div around its video and sometimes adds a canvas and a
+   shaded scan region. All of them are forced to fill the box, so the camera
+   reaches every edge with nothing letterboxed around it. */
+.scanner-box > div,
+.scanner-box video,
+.scanner-box canvas,
+.scanner-box #qr-shaded-region {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    object-fit: cover;
+    border: 0 !important;
+}
+.scanner-box #qr-shaded-region { background: transparent !important; }
+#scanBtn.active { background: var(--saffron); color: #fff; border-color: var(--saffron); }
+
+.checkin-pad { max-width: 660px; margin-inline: auto; width: 100%; }
+
+/* Numpad left, actions right - the layout people already know from a till. */
+.pad-grid {
+    display: grid;
+    /* The actions column takes only what C and Check-In need; the numpad
+       absorbs everything else, so the digits are always thumb-sized.
+       On a 305px phone that is a 58px key; on a 390px one, 84px. */
+    grid-template-columns: minmax(0, 1fr) clamp(88px, 25%, 150px);
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+}
+/*  1 2 3   |  C
+    4 5 6   |
+    7 8 9   |  Check-In  (spans the three rows below C)
+    0 back  |
+   Digits on the LEFT, where a thumb expects them.                    */
+.pad-keys {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+}
+.pad-back { grid-column: span 2; }        /* 0 then a wide backspace */
+
+.pad-side {
+    display: grid;
+    grid-template-rows: 1fr 3fr;          /* C, then Check-In under it */
+    gap: 8px;
+}
+
+.pad-key {
+    padding: 0;
+    min-height: 62px;
+    border: 1px solid var(--cream-dark);
+    border-radius: 10px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 23px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--brown-deep);
+    cursor: pointer;
+    transition: transform .06s, background .15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.pad-key:hover { background: var(--cream); border-color: var(--saffron); }
+.pad-key:active { transform: scale(.94); background: var(--gold-pale); }
+.pad-fn { background: var(--cream); color: var(--saffron-deep); font-size: 19px; }
+.pad-go-key {
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.15;
+    padding: 4px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--saffron-deep), var(--saffron));
+    color: #fff;
+    border-color: var(--saffron-deep);
+    font-size: 17px;
+}
+.pad-go-key i { font-size: 22px; }
+.pad-go-key span { font-size: clamp(12px, 3.4vw, 17px); }
+.pad-go-key:hover { background: linear-gradient(135deg, var(--saffron), var(--saffron-light)); color: #fff; }
+
+.pad-display {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 2px solid var(--cream-dark);
+    border-radius: 12px;
+    background: #fff;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 32px; font-weight: 700; letter-spacing: 4px;
+    text-align: center; color: var(--brown-deep);
+    caret-color: var(--saffron);
+}
+.pad-display:focus { outline: none; border-color: var(--saffron); box-shadow: 0 0 0 4px rgba(212,56,13,.12); }
+.pad-hint { text-align: center; display: block; margin-top: 8px; }
+
+.toast-count { margin-left: 6px; opacity: .8; font-size: 12px; }
+
+@media (max-width: 768px) {
+    .checkin-card .card-body { padding: 10px; }
+    .scanner-box { max-width: 100%; aspect-ratio: 4 / 3; margin-bottom: 10px; }
+    /* Full width on a phone whether or not focus mode is on. */
+    .checkin-pad { max-width: none; margin: 0; width: 100%; }
+    .pad-display { font-size: 30px; padding: 11px; }
+    .pad-key { min-height: 60px; font-size: 26px; }
+}
+
+/* The seat number on the check-in verdict: the thing a volunteer reads out. */
+.seat-badge {
+    flex: 0 0 auto;
+    text-align: center;
+    background: #fff;
+    border: 2px solid currentColor;
+    border-radius: 10px;
+    padding: 4px 12px;
+    line-height: 1.05;
+}
+.seat-badge small {
+    display: block;
+    font-size: 9px; font-weight: 700; letter-spacing: .6px;
+    text-transform: uppercase; opacity: .75;
+}
+.seat-badge b {
+    display: block;
+    font-size: 30px; font-weight: 800;
+    font-variant-numeric: tabular-nums; letter-spacing: 1px;
+}
+.slip-btn { flex: 0 0 auto; margin-left: auto; }
+.slip-seat {
+    font-size: 17px; font-weight: 800; text-align: center;
+    font-variant-numeric: tabular-nums; color: var(--saffron-deep);
+}
+
+@media (max-width: 768px) {
+    .seat-badge b { font-size: 26px; }
+    .slip-btn { margin-left: 0; width: 100%; justify-content: center; }
+}
+body.checkin-focus .seat-badge b { font-size: 34px; }
+
+/* Picking a paper size before printing passes. */
+.size-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 4px; }
+.size-choice.four { grid-template-columns: repeat(2, 1fr); }
+.size-card {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 18px 14px; cursor: pointer; text-align: center;
+    border: 2px solid var(--cream-dark); border-radius: 12px;
+    background: #fff; font-family: inherit; color: var(--brown-deep);
+    transition: border-color .15s, background .15s;
+}
+.size-card:hover { border-color: var(--saffron); background: var(--cream); }
+.size-card i { font-size: 26px; color: var(--saffron-deep); }
+.size-card b { font-size: 15px; }
+.size-card small { font-size: 11.5px; color: var(--brown-mid); line-height: 1.35; }
+@media (max-width: 600px) { .size-choice { grid-template-columns: 1fr; } }
+
+.seat-cell {
+    font-size: 15px; font-weight: 800; color: var(--saffron-deep);
+    font-variant-numeric: tabular-nums;
+}
+.btn-icon[disabled] { opacity: .32; cursor: not-allowed; }
+
+/* Bulk edit takes the whole window: sidebar, page header and filters go, so
+   the grid is all there is. */
+body.bulk-fullscreen .sidebar,
+body.bulk-fullscreen .sidebar-overlay,
+body.bulk-fullscreen .mobile-header { display: none !important; }
+/* The filter bar stays - you still need to search while entering - but it is
+   compressed to one slim line so the grid keeps the height. */
+body.bulk-fullscreen .filter-bar {
+    margin: 0 0 6px;
+    padding: 6px 10px;
+    gap: 8px;
+    position: sticky;
+    top: 52px;
+    z-index: 55;
+}
+body.bulk-fullscreen .filter-bar label { font-size: 11px; }
+body.bulk-fullscreen .filter-bar select,
+body.bulk-fullscreen .filter-bar input { padding: 6px 9px; font-size: 13px; }
+body.bulk-fullscreen .main-content { margin-left: 0 !important; }
+body.bulk-fullscreen .page-header {
+    position: sticky; top: 0; z-index: 60;
+    background: var(--cream-light);
+    border-bottom: 1px solid var(--cream-dark);
+}
+body.bulk-fullscreen .page-header .btn:not(#bulkEditBtn) { display: none; }
+body.bulk-fullscreen .page-body { padding: 8px 12px 0 !important; }
+body.bulk-fullscreen .card { margin: 0; }
+/* More rows on screen at once. */
+body.bulk-fullscreen .paged-wrap { max-height: calc(100vh - 235px); }
+body.bulk-fullscreen .table td { padding-top: 6px; padding-bottom: 6px; }
+
+/* Centred columns: a seat number and a tick box read better in the middle of
+   their column than shoved to one edge. */
+.table th.mid, .table td.mid { text-align: center; font-variant-numeric: tabular-nums; }
+/* Names read left, whatever the column default is - a right-aligned name is
+   hard to scan down. */
+.table th.lft, .table td.lft { text-align: left !important; }
+.fe-table th.mid, .fe-table td.mid { text-align: center; }
+
+.print-pending {
+    margin-right: 6px; font-size: 10.5px; vertical-align: middle;
+}
+.dh-type {
+    display: inline-block; margin-right: 4px; padding: 0 4px;
+    border-radius: 4px; background: #E7F6EC; color: #1a4d2e;
+    font-size: 10px; font-weight: 700;
+}
+body.sk-bulk-mode .sk-dh { background: var(--cream); }
+
+.tpl-toggle {
+    width: 26px; height: 26px; margin-right: 8px; cursor: pointer;
+    border: 1px solid var(--cream-dark); border-radius: 6px;
+    background: var(--cream); color: var(--saffron-deep); font-size: 12px;
+}
+.tpl-toggle:hover { border-color: var(--saffron); background: #fff; }
+tr.tpl-detail td { background: var(--cream-light); }
+
+.year-picks { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 4px 0; }
+.year-picks .yp {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-weight: 600; font-size: 13.5px; cursor: pointer;
+}
+.year-picks input { width: 17px; height: 17px; accent-color: var(--saffron-deep); }
+.year-picks input:disabled + * { opacity: .5; }
+
+/* Which level a column is sorting at, when more than one is in force. */
+.sort-lvl {
+    margin-left: 3px; padding: 0 4px; border-radius: 6px;
+    background: var(--saffron-deep); color: #fff;
+    font-size: 9px; font-weight: 800;
+}
+
+/* A count in the attendance report that opens the list behind it. */
+.drill {
+    font: inherit; font-weight: 800; color: inherit; cursor: pointer;
+    background: none; border: none; padding: 2px 6px; border-radius: 6px;
+    border-bottom: 1.5px dashed currentColor;
+}
+.drill:hover { background: var(--cream); }
+.fe-table th.lft, .fe-table td.lft { text-align: left; }
+
+/* Registering at the door: a switch that has real consequences, so it is
+   given room and says what it will do. */
+.fe-eventday {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 10px 12px; margin: 0 0 10px;
+    border: 1px solid var(--cream-dark); border-radius: 10px;
+    background: var(--cream-light);
+}
+.fe-eventday.on { border-color: var(--saffron); background: #FFF3C4; }
+.fe-eventday .field-hint.on { color: var(--saffron-deep); font-weight: 600; }
+.fe-eventday select { max-width: 220px; }
+
+.fe-done tr.fe-head td { background: var(--cream); }
+.fe-pick { width: 18px; height: 18px; accent-color: var(--saffron-deep); }
+.fe-pick:disabled { opacity: .35; }
+
+/* A two-row header with grouped columns, as in the printed sheets the
+   centres already use. */
+.grid-report th { vertical-align: middle; }
+.grid-report th.grp { border-left: 2px solid var(--cream-dark); }
+.grid-report td.mid:nth-child(7),
+.grid-report th.grp { background: var(--cream-light); }
+.grid-report tfoot td { border-top: 2px solid var(--saffron); }
+
+/* Pass and seat read together on the fast-entry list: GN1537-008. */
+.reg-code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight: 700; letter-spacing: .3px; color: var(--saffron-deep);
+}
+/* Amounts sit right in the drill-down list too. */
+.fe-table th.amt, .fe-table td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Rereading the instructions later, from the sidebar. */
+.btn-instr {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-bottom: 8px; padding: 9px 12px; cursor: pointer;
+    font-family: inherit; font-size: 13.5px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.28); border-radius: 9px;
+    background: rgba(255,255,255,.08); color: #fff;
+}
+.btn-instr:hover { background: rgba(255,255,255,.16); }
+
+/* The manual, listed and read inside the dialog. */
+.help-tabs { margin-bottom: 14px; }
+.manual-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.manual-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border: 1px solid var(--cream-dark);
+    border-radius: 12px; background: var(--cream-light);
+}
+.manual-ico {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff; border: 1px solid var(--cream-dark);
+    color: #B7231A; font-size: 21px;
+}
+.manual-meta { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.manual-meta strong { font-size: 15.5px; }
+.manual-meta small { font-size: 12.5px; line-height: 1.4; }
+.manual-acts { flex: 0 0 auto; display: flex; gap: 8px; }
+
+/* The PDF itself. A fixed height, because an <object> with no height
+   collapses to nothing and the viewer never appears. */
+.pdf-frame {
+    height: 62vh; min-height: 380px;
+    border: 1px solid var(--cream-dark); border-radius: 10px;
+    overflow: hidden; background: #f3f1ee;
+}
+.pdf-frame object { width: 100%; height: 100%; border: 0; }
+.pdf-fallback {
+    height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px; padding: 24px;
+    text-align: center; color: var(--brown-mid);
+}
+.pdf-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+@media (max-width: 640px) {
+    .manual-item { flex-wrap: wrap; }
+    .manual-acts { width: 100%; }
+    .manual-acts .btn { flex: 1; justify-content: center; }
+    .pdf-frame { height: 55vh; }
+}
+
+/* The password gate reuses the instruction card, narrower. */
+.pw-card { width: min(560px, 100%); }
+.pw-card .instr-body .form-group { margin-bottom: 14px; }
+.pw-card .instr-body input {
+    width: 100%; padding: 11px 13px; font-size: 15px; font-family: inherit;
+    border: 2px solid var(--cream-dark); border-radius: 9px; background: #fff;
+}
+.pw-card .instr-body input:focus { outline: none; border-color: var(--saffron); }
+.io-status.err {
+    margin-top: 10px; background: #FDECEA; border-color: #E8A9A2; color: #8C1D13;
+}
+
+/* ==================== INSTRUCTION GATE ==================== */
+/* Held in front of the app, not floated over it: an instruction that can be
+   clicked past is one nobody reads. */
+body.instr-open { overflow: hidden; }
+.instr-gate {
+    position: fixed; inset: 0; z-index: 4000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: linear-gradient(160deg, #6B1400 0%, #8B1A00 55%, #A8420E 100%);
+}
+.instr-card {
+    width: min(860px, 100%); max-height: 92vh;
+    display: flex; flex-direction: column;
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,.35);
+}
+.instr-head {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 20px 24px 14px; border-bottom: 2px solid var(--cream-dark);
+}
+.instr-head h2 { font-size: 21px; color: var(--saffron-deep); margin: 0; }
+.instr-head small { color: var(--brown-mid); font-weight: 600; }
+.instr-lang {
+    margin-left: auto; flex: 0 0 auto; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--cream-dark); background: var(--cream); color: var(--brown-deep);
+}
+.instr-body {
+    flex: 1 1 auto; overflow-y: auto; padding: 18px 24px;
+    font-size: 15px; line-height: 1.65; color: var(--brown-deep);
+}
+.instr-body h3 { font-size: 17px; margin: 0 0 10px; color: var(--saffron-deep); }
+.instr-body h4 { font-size: 15px; margin: 18px 0 6px; }
+.instr-body p, .instr-body ul, .instr-body ol { margin: 0 0 12px; }
+.instr-body ul, .instr-body ol { padding-left: 22px; }
+.instr-body li { margin-bottom: 7px; }
+.instr-foot {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 16px 24px; border-top: 2px solid var(--cream-dark);
+    background: var(--cream-light);
+}
+.instr-actions { margin-left: auto; display: flex; gap: 10px; }
+.instr-foot .check-inline { font-size: 14.5px; }
+@media (max-width: 640px) {
+    .instr-gate { padding: 0; }
+    .instr-card { max-height: 100vh; border-radius: 0; }
+    .instr-actions { margin-left: 0; width: 100%; }
+    .instr-actions .btn { flex: 1; justify-content: center; }
+}
+
+.instr-list .instr-item {
+    padding: 10px 0; border-bottom: 1px solid var(--cream-dark);
+}
+.instr-detail {
+    margin-top: 10px; padding: 12px 14px;
+    background: var(--cream-light); border-radius: 8px;
+    font-size: 14px; line-height: 1.6;
+}
+.instr-detail ul, .instr-detail ol { padding-left: 20px; }
+
+/* Picking roles and rights for an instruction. */
+.pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 2px 14px; }
+.pick-grid.tall { max-height: 230px; overflow-y: auto; padding: 8px 10px; border: 1px solid var(--cream-dark); border-radius: 8px; background: #fff; }
+.pick-grid .yp {
+    display: flex; align-items: center; gap: 8px;
+    min-height: 30px; font-size: 13.5px; font-weight: 500;
+    color: var(--brown-deep); cursor: pointer;
+}
+.pick-grid .yp span { line-height: 1.3; }
+.pick-grid .yp:hover { color: var(--saffron-deep); }
+
+/* A long dialog form, grouped. Each block says what it is for, so the field
+   you came to edit is findable without reading the whole form. */
+.form-sec {
+    border: 1px solid var(--cream-dark);
+    border-radius: 12px;
+    padding: 14px 16px 2px;
+    margin-bottom: 16px;
+    background: var(--cream-light);
+}
+.form-sec-h {
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--saffron-deep); margin-bottom: 12px;
+}
+.form-sec .form-group:last-child { margin-bottom: 12px; }
+
+/* The same field in both languages, side by side, so it is obvious which one
+   is filled in and which is not. */
+.lang-pair textarea {
+    min-height: 240px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+@media (max-width: 900px) {
+    .lang-pair { grid-template-columns: 1fr; }
+    .lang-pair textarea { min-height: 170px; }
+}
+
+/* Reading language, inside the Instruction & Manual dialog. */
+.help-bar {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.help-bar .help-tabs { margin-bottom: 0; }
+.lang-seg {
+    display: inline-flex; padding: 3px;
+    background: var(--cream-dark); border-radius: 10px;
+}
+.lang-seg-btn {
+    border: none; background: transparent; cursor: pointer;
+    font-family: inherit; font-size: 12.5px; font-weight: 700;
+    color: var(--brown-mid); padding: 7px 14px; border-radius: 8px;
+    transition: all var(--transition);
+}
+.lang-seg-btn:hover { color: var(--saffron-deep); }
+.lang-seg-btn.active {
+    background: #fff; color: var(--saffron-deep);
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+.pick-grp { margin-bottom: 8px; }
+.pick-grp small {
+    display: block; font-weight: 700; text-transform: uppercase;
+    font-size: 10.5px; letter-spacing: .4px; color: var(--saffron-deep);
+    margin-bottom: 2px;
+}
+
+/* ==================== COMMUNICATION ==================== */
+.tabs { display: flex; align-items: flex-end; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+/* A page-level action belongs at the far end of the tab line, not stacked
+   above the list it acts on. */
+.tabs-action { margin-left: auto; margin-bottom: 4px; }
+@media (max-width: 640px) {
+    .tabs-action { margin-left: 0; width: 100%; justify-content: center; }
+}
+.tabs .tab {
+    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    padding: 9px 18px; border-radius: 9px 9px 0 0;
+    border: 1px solid var(--cream-dark); border-bottom: none;
+    background: #fff; color: var(--brown-mid);
+}
+.tabs .tab.active { background: var(--saffron); color: #fff; border-color: var(--saffron); }
+
+.tpl-snip { color: var(--brown-mid); white-space: pre-line; }
+
+/* The clickable field list under a template. */
+.ph-box { margin: -4px 0 14px; }
+.ph-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ph-chip {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    padding: 4px 8px; cursor: pointer; border-radius: 6px;
+    border: 1px solid var(--cream-dark); background: var(--cream); color: var(--brown-deep);
+}
+.ph-chip:hover { border-color: var(--saffron); background: #fff; }
+
+.msg-preview {
+    border: 1px solid var(--cream-dark); border-radius: 10px;
+    padding: 12px 14px; margin: 10px 0; background: #fff;
+}
+.msg-subject {
+    font-weight: 700; padding-bottom: 8px; margin-bottom: 8px;
+    border-bottom: 1px solid var(--cream-dark);
+}
+.msg-body {
+    font-family: inherit; font-size: 14px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word; margin: 0;
+}
+.wa-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-height: 260px; overflow: auto; }
+.check-inline { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.check-inline input { width: 18px; height: 18px; accent-color: var(--saffron-deep); }
+
+/* Dharmada, editable in bulk mode only. */
+.dh-type-edit, .dh-amt-edit { display: none; }
+body.sk-bulk-mode .dh-read { display: none; }
+body.sk-bulk-mode .dh-type-edit { display: inline-block; }
+body.sk-bulk-mode .dh-amt-edit { display: inline-block; }
+.dh-type-edit {
+    padding: 5px 6px; font-family: inherit; font-size: 13px;
+    border: 1px solid var(--cream-dark); border-radius: 6px;
+}
+.dh-amt-edit {
+    width: 96px; padding: 5px 7px; text-align: right;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--cream-dark); border-radius: 6px;
+}
+.just-saved { border-color: #14803C !important; background: #E7F6EC !important; }
+
+/* ==================== SANKALP BULK EDIT ==================== */
+/* Bulk mode swaps two columns for one. Driven entirely by the body class so
+   it applies to every row, including the ones paged off screen. */
+body.sk-bulk-mode .sk-action,
+body.sk-bulk-mode .sk-collecting,
+body.sk-bulk-mode .sk-money { display: none !important; }
+/* Dharmada is reference only, and only shown while bulk editing. */
+.sk-dh { display: none; }
+body.sk-bulk-mode .sk-dh { display: table-cell; }
+.sk-bulk { display: none; white-space: nowrap; vertical-align: middle; }
+body.sk-bulk-mode .sk-bulk { display: table-cell; }
+.amt-edit { display: none; }
+body.sk-bulk-mode .amt-edit { display: inline-block; }
+body.sk-bulk-mode .amt-read { display: none; }
+/* The tick box and the + sit on one line, centred against each other - the
+   button was dropping below the box because they were separate inline items
+   with different heights. */
+.bulk-cell { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.bulk-cell .btn-chip { margin: 0; padding: 6px 10px; line-height: 1; }
+
+.amt-edit {
+    width: 110px; padding: 6px 8px; text-align: right;
+    border: 1px solid var(--cream-dark); border-radius: 7px;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.amt-edit:focus { outline: none; border-color: var(--saffron); box-shadow: 0 0 0 3px rgba(212,56,13,.12); }
+.amt-edit:disabled { background: #E7F6EC; color: #14803C; border-color: #A8D5BA; }
+
+.bulk-check { display: inline-flex; align-items: center; margin: 0; cursor: pointer; }
+.bulk-check input { width: 22px; height: 22px; accent-color: var(--saffron-deep); cursor: pointer; }
+
+tr.sk-locked td { background: #F2FBF5 !important; }
+tr.sk-saving { opacity: .55; }
+#bulkEditBtn.active { background: var(--saffron); color: #fff; border-color: var(--saffron); }
+
+/* ==================== FOCUS MODE ==================== */
+/* Nothing but the camera and the keypad. */
+body.checkin-focus { overflow: hidden; }
+body.checkin-focus .sidebar,
+body.checkin-focus .sidebar-overlay,
+body.checkin-focus .mobile-header,
+body.checkin-focus .page-header,
+body.checkin-focus .filter-bar,
+body.checkin-focus .lang-toggle,
+body.checkin-focus .lang-switch,
+body.checkin-focus .card:not(.checkin-card),
+body.checkin-focus .pad-hint { display: none !important; }
+
+body.checkin-focus .main-content { margin: 0 !important; padding: 0 !important; }
+body.checkin-focus .page-body { padding: 0 !important; }
+
+body.checkin-focus .checkin-card {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+}
+body.checkin-focus .checkin-card .card-header {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    padding-top: max(6px, env(safe-area-inset-top));
+}
+body.checkin-focus .checkin-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0 0 max(6px, env(safe-area-inset-bottom));
+    gap: 6px;
+}
+/* Edge to edge: no border, no rounding, no margin. */
+body.checkin-focus .scanner-box {
+    flex: 1 1 auto;
+    min-height: 120px;
+    aspect-ratio: auto;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+/* `margin: 0 auto` on a column-flex child overrides `align-self: stretch` and
+   sizes the item to its content instead - which is why the keypad sat in the
+   middle with dead space either side. Zero the auto margin and stretch it. */
+body.checkin-focus .checkin-pad {
+    flex: 0 0 auto;
+    max-width: none;
+    width: auto;
+    margin: 0;
+    align-self: stretch;
+    padding: 0 6px;
+}
+body.checkin-focus .pad-grid { margin-top: 6px; }
+body.checkin-focus .checkin-verdict { flex: 0 0 auto; margin: 0 8px; padding: 10px 14px; }
+body.checkin-focus .checkin-verdict i { font-size: 28px; }
+body.checkin-focus .checkin-verdict strong { font-size: 18px; }
+body.checkin-focus #passPeek { margin: 6px 0 0; }
+body.checkin-focus .pad-display { font-size: 28px; padding: 9px; margin-top: 6px; }
+body.checkin-focus .pad-key { min-height: 58px; font-size: 26px; }
+body.checkin-focus .pad-go-key { font-size: 15px; }
+body.checkin-focus .pad-go-key i { font-size: 19px; }
+
+/* Landscape: camera left, keypad right, neither squashed. */
+@media (max-height: 520px) and (orientation: landscape) {
+    body.checkin-focus .checkin-body { flex-direction: row; align-items: stretch; }
+    body.checkin-focus .scanner-box { flex: 1 1 48%; }
+    body.checkin-focus .checkin-pad { flex: 1 1 52%; align-self: center; }
+    body.checkin-focus .pad-key { min-height: 42px; font-size: 19px; }
+    body.checkin-focus .pad-display { font-size: 22px; padding: 6px; }
+}
+
+@media (max-height: 700px) {
+    body.checkin-focus .pad-key { min-height: 52px; font-size: 23px; }
+    body.checkin-focus .pad-display { font-size: 25px; padding: 7px; }
+}
+
+/* ==================== PERMISSIONS EDITOR ==================== */
+.perm-btn { white-space: nowrap; font-weight: 600; }
+.perm-btn:hover { border-color: var(--saffron); color: var(--saffron); }
+.perm-count {
+    display: inline-block; padding: 1px 6px; border-radius: 8px;
+    background: var(--cream-dark); color: var(--brown-mid);
+    font-size: 11px; font-variant-numeric: tabular-nums;
+}
+
+.perm-group { margin-bottom: 16px; }
+.perm-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .4px; color: var(--saffron-deep);
+    padding-bottom: 6px; margin-bottom: 8px;
+    border-bottom: 1px dashed var(--cream-dark);
+}
+.perm-head .btn-chip { padding: 3px 9px; font-size: 11px; min-height: 0; margin-left: 0; }
+.perm-head .btn-chip:first-of-type { margin-left: auto; }
+.perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 14px; }
+.perm-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 8px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; font-size: 13px;
+}
+.perm-item:hover { background: var(--cream); }
+.perm-item.changed { background: var(--gold-pale); border-color: var(--gold); }
+.perm-label { line-height: 1.3; }
+.perm-label small { display: block; font-size: 10.5px; color: var(--brown-mid); }
+
+/* The Year control that both fast-entry grids share. */
+.fe-year { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.fe-year label { font-size: 12px; font-weight: 700; color: var(--brown-mid); }
+.fe-year select {
+    padding: 7px 10px; border: 1px solid var(--cream-dark); border-radius: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 600; background: #fff;
+}
+.fe-year .field-hint { margin: 0; }
+
+@media (max-width: 768px) { .perm-grid { grid-template-columns: 1fr; } }
+
+/* ======================== ACCESSIBILITY ======================== */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 4000;
+    background: var(--saffron-deep);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 0 0 8px 0;
+    font-weight: 600;
+}
+.skip-link:focus { left: 0; }
+
+/* A visible keyboard focus ring everywhere. Mouse users never see it. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ======================== CHECK-IN VERDICT ======================== */
+/* Full-width, high-contrast result panel. A volunteer at the gate reads this
+   at arm's length with a queue waiting, so it is deliberately loud. */
+.checkin-verdict {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    color: #fff;
+    animation: verdict-in .25s ease;
+}
+.checkin-verdict:empty { display: none; }
+.checkin-verdict i { font-size: 40px; flex-shrink: 0; }
+.checkin-verdict strong { display: block; font-size: 22px; line-height: 1.25; }
+.checkin-verdict span { display: block; font-size: 14px; opacity: .9; margin-top: 2px; }
+.checkin-verdict.ok   { background: linear-gradient(135deg, #14803C, #1BA84E); }
+.checkin-verdict.fail { background: linear-gradient(135deg, #9B1C1C, #C62828); }
+@keyframes verdict-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+tr.row-new { animation: row-flash 1.4s ease; }
+@keyframes row-flash { from { background: var(--gold-pale); } to { background: transparent; } }
+
+/* ======================== STACKED TABLES (MOBILE) ======================== */
+/* Horizontal scrolling on a 9-column table is unusable on a phone, and centre
+   volunteers do most data entry on phones. Below 768px each row becomes a
+   card; the column header is injected from the data-label attribute that
+   labelTableCells() writes in app.html. */
+@media (max-width: 768px) {
+    .table-stack thead { display: none; }
+    .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100%; }
+    .table-stack tr {
+        border: 1px solid var(--cream-dark);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .table-stack td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border: none;
+        border-bottom: 1px dashed var(--cream-dark);
+        padding: 9px 0;
+        text-align: right;
+    }
+    .table-stack tr td:last-child { border-bottom: none; }
+    .table-stack td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--brown-mid);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .table-stack td[data-label=""]::before,
+    .table-stack td:not([data-label])::before { content: none; }
+    .table-stack .action-btns { justify-content: flex-end; }
+    .table-stack tfoot { display: block; }
+    .table-stack tfoot tr { background: var(--gold-pale); }
+    .table-stack td[colspan] { justify-content: center; }
+    .table-stack td[colspan]::before { content: none; }
+}
+
+/* ======================== PRINT ======================== */
+/* Landscape: these reports have a dozen columns and are unreadable squeezed
+   into portrait. Switched per report by the wide-report class. */
+@page { size: A4 landscape; margin: 10mm 10mm; }
+
+/* Shown only on paper. */
+.print-only { display: none; }
+
+@media print {
+    /* Screen chrome never reaches the page. */
+    .sidebar, .mobile-header, .page-header, .filter-bar, .skip-link,
+    .btn, .btn-icon, .btn-chip, .action-btns, .modal-overlay, .scanner-box,
+    .toast-container, .form-actions, .report-cards, .tabs, #ioFile,
+    .sidebar-overlay { display: none !important; }
+
+    .main-content { margin-left: 0 !important; padding-top: 0 !important; }
+    .page-body { padding: 0 !important; }
+    body { background: #fff !important; font-size: 10.5pt; }
+    a[href]::after { content: none !important; }
+
+    /* Cards lose their shadow and border so the sheet is just the report. */
+    .card, .report-card {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        break-inside: auto;
+    }
+    .card-header { display: none !important; }
+    .card-body { padding: 0 !important; }
+    /* No card on paper: no border, no shadow, no rounding, no background.
+       A printed report should be a masthead and a table, nothing else. */
+    .card, .report-card, .summary-card, .stat-card {
+        border: none !important; box-shadow: none !important;
+        border-radius: 0 !important; background: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* When one report is being printed, everything else is hidden. */
+
+    /* Hide every card except the one being printed. Keyed on .printing, not
+       on .report-card - a card without the wrapper class was being hidden
+       even while it was the one printing, which produced a blank page. */
+    body.printing-report .card:not(.printing) { display: none !important; }
+    /* Summary tiles and filter bars are screen furniture. */
+    body.printing-report .summary-cards,
+    body.printing-report .stat-grid,
+    body.printing-report .filter-bar,
+    body.printing-report .pager { display: none !important; }
+    /* The report chooser tiles are a menu, not part of any report. Careful:
+       a tile is .report-card and so is the printed wrapper, so this hides the
+       grid that holds them rather than the class they share. */
+    .reports-grid { display: none !important; }
+    /* No buttons on paper - including the Print button that started it. */
+    button, .btn, .btn-icon, .btn-chip, .tabs { display: none !important; }
+
+    /* ---- the printed masthead ---- */
+    .print-only { display: block !important; }
+    .print-head {
+        border-bottom: 2px solid #8B1A00;
+        padding-bottom: 6pt;
+        margin-bottom: 10pt;
+    }
+    .print-head { text-align: center; }
+    .ph-org {
+        font-size: 9pt; font-weight: 700; letter-spacing: .5pt;
+        text-transform: uppercase; color: #8B1A00;
+    }
+    .ph-title { font-size: 15pt; font-weight: 800; color: #1A0A00; margin-top: 2pt; }
+    /* Centred under the title, on one line. */
+    .ph-meta {
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: 3pt 18pt;
+        font-size: 8.5pt; color: #5D4037; margin-top: 5pt;
+    }
+
+    /* ---- tables ---- */
+    /* Never scroll on paper: every column is printed. */
+    .table-responsive { overflow: visible !important; max-height: none !important; }
+    .table { width: 100% !important; border-collapse: collapse; font-size: 9.5pt; }
+    .table thead { display: table-header-group; }      /* header on every page */
+    .table tfoot { display: table-footer-group; }
+    .table tr { break-inside: avoid; page-break-inside: avoid; }
+    .table th, .table td {
+        border: 0.4pt solid #C9BDB0 !important;
+        padding: 3pt 5pt !important;
+        vertical-align: top;
+    }
+    .table thead th {
+        background: #F5E6D3 !important;
+        color: #3E2723 !important;
+        font-size: 8.5pt; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .3pt;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .table tfoot td {
+        background: #FFF3C4 !important;
+        font-weight: 800;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .table th.num, .table td.num { text-align: right !important; }
+    .table tbody tr:nth-child(even) td { background: #FCF8F2 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* Badges and bars become plain text so the sheet stays legible in mono. */
+    .badge, .chip-count, .cross-cell, .mem-code-cell {
+        background: none !important; color: #1A0A00 !important;
+        border: none !important; padding: 0 !important; font-weight: 700;
+    }
+    .progress-bar, .mini-bar { display: none !important; }
+
+    /* Wide reports go landscape so nothing is clipped. */
+    /* Pagers and sort arrows are screen furniture. */
+    .pager, .sort-ico { display: none !important; }
+    .sortable-th { cursor: default; }
+    .section-sub { font-size: 11pt; margin: 12pt 0 5pt; border: none; color: #8B1A00; }
+
+    /* Stacking is a screen concern - print the real table. */
+    .table-stack, .table-stack thead, .table-stack tbody,
+    .table-stack tr, .table-stack td { display: revert; width: auto; }
+    .table-stack td::before { content: none; }
+}
+/* ==================== GURUJI DARSHAN ==================== */
+/* The double tick lives in the seat cell, beside the number, rather than in a
+   column of its own: the seat is what gets read out at the darshan queue, and
+   a separate column would put the answer somewhere nobody is looking. */
+/* Two stages, two marks, both beside the seat number:
+     .one  the attendance desk sent them to darshan
+     .two  Guruji's desk finished them
+   The single tick is lighter, so a glance down a column tells the two apart
+   without reading - which matters more than either being pretty. */
+.darshan-tick {
+    display: inline-flex;
+    margin-left: 6px;
+    color: #14803C;
+    font-size: 11px;
+    letter-spacing: -4px;
+    vertical-align: middle;
+}
+.darshan-tick i:last-child { margin-left: 4px; }
+.darshan-tick.one { color: #4FA96B; }
+.darshan-tick.two { color: #0F6B32; }
+.seat-badge.darshan .darshan-tick { font-size: 13px; }
+
+/* The mode switch. Deliberately not styled as a quiet checkbox - it changes
+   what a scan does, so it has to look like a switch that is on. */
+.darshan-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 13px; margin: 0;
+    border: 2px solid var(--cream-dark); border-radius: 10px;
+    background: #fff; cursor: pointer;
+    font-size: 13px; font-weight: 700; color: var(--brown-mid);
+    white-space: nowrap;
+    transition: all var(--transition);
+}
+.darshan-toggle:hover { border-color: var(--saffron); color: var(--saffron-deep); }
+.darshan-toggle input { width: 17px; height: 17px; accent-color: #14803C; margin: 0; }
+.darshan-toggle:has(input:checked) {
+    border-color: #14803C; background: #EAF7EE; color: #0F6B32;
+}
+.darshan-toggle i { font-size: 14px; }
+
+/* Darshan mode: the green key says darshan, so nobody at the desk believes
+   they are still handing out seats. */
+.pad-key.pad-darshan {
+    background: linear-gradient(135deg, #0F6B32, #14803C) !important;
+}
+.checkin-verdict.info { background: linear-gradient(135deg, #23506E, #2E6E96); }
+.checkin-verdict.ok.repeat { background: linear-gradient(135deg, #1F6B4B, #2E8B63); }
+body.darshan-mode .checkin-card { box-shadow: 0 0 0 2px #14803C inset; }
+
+/* The entry panel on the Sankalp page. One member at a time, last year beside
+   this year, and a single button that saves and ticks. */
+.darshan-panel { border: 2px solid #14803C; }
+.darshan-panel .card-header h3 { color: #0F6B32; }
+/* Title line, search and the way out, all on one row. With the queue feeding
+   itself the search is only for jumping out of order, so it does not get a
+   row of its own. */
+.ds-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ds-head h3 { margin-right: auto; }
+.ds-exit { flex: 0 0 auto; }
+.ds-find { display: flex; gap: 8px; align-items: center; }
+.ds-find input {
+    flex: 1 1 auto; width: 260px; max-width: 300px;
+    padding: 9px 13px; font-size: 15px; font-weight: 700;
+    letter-spacing: .5px;
+    border: 2px solid var(--cream-dark); border-radius: var(--radius-sm);
+    font-family: inherit; color: var(--brown-deep); outline: none;
+}
+
+/* The desk: pledges on the left, the waiting queue down the right. */
+.ds-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 18px;
+    align-items: start;
+}
+.ds-main { min-width: 0; }
+.ds-queue {
+    border: 1px solid var(--cream-dark);
+    border-radius: 12px;
+    background: var(--cream-light);
+    padding: 12px;
+}
+.ds-queue-h {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--saffron-deep);
+    margin-bottom: 10px;
+}
+.ds-queue-h b {
+    background: #14803C; color: #fff; border-radius: 20px;
+    padding: 1px 9px; font-size: 12px;
+}
+#dsQueueList { max-height: calc(100vh - 300px); overflow-y: auto; margin-bottom: 10px; }
+/* Seat number and name only: that is all the desk reads off the queue. */
+.ds-q-row {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px 10px; margin-bottom: 4px;
+    background: #fff; border: 1px solid var(--cream-dark);
+    border-radius: 9px; cursor: pointer; text-align: left;
+    font-family: inherit; color: var(--brown-deep);
+    transition: all var(--transition);
+}
+.ds-q-row:hover { border-color: var(--saffron); }
+.ds-q-row .seat-cell { font-size: 15px; min-width: 34px; }
+.ds-q-row span {
+    flex: 1 1 auto; font-size: 13px; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ds-q-row em {
+    font-style: normal; font-size: 9.5px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .5px;
+    background: var(--cream-dark); color: var(--brown-mid);
+    border-radius: 5px; padding: 2px 6px;
+}
+.ds-q-row.current {
+    border-color: #14803C; background: #EAF7EE;
+    box-shadow: 0 0 0 1px #14803C inset;
+}
+/* Already seen. Dimmed rather than removed, so the strip stays a record of
+   who arrived instead of shrinking into a list of people who did not. */
+.ds-q-row.done { opacity: .62; background: var(--cream-light); }
+.ds-q-row.done span { font-weight: 500; }
+.ds-q-row.done .darshan-tick { margin-left: 0; }
+
+/* The pending count, on the button that opens the detail. */
+.ds-pending-btn { flex: 0 0 auto; }
+.ds-pending-count {
+    display: inline-block; min-width: 20px; margin-left: 4px;
+    padding: 1px 7px; border-radius: 20px;
+    background: var(--danger); color: #fff;
+    font-size: 11.5px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.ds-pending-count.none { background: #14803C; }
+.ds-pending-count.done { background: #14803C; }
+/* Two count buttons and a jump field on one line: let them wrap rather than
+   squeeze the field down to nothing on a narrower screen. */
+.ds-head { row-gap: 8px; }
+.ds-queue-empty {
+    padding: 18px 10px; text-align: center;
+    font-size: 12.5px; color: var(--brown-mid);
+}
+.ds-idle {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 60px 20px; text-align: center;
+    color: var(--brown-mid); font-size: 14px;
+}
+.ds-idle i { font-size: 44px; color: var(--cream-dark); }
+/* The desk table: fixed columns so the totals in the footer sit exactly
+   under the figures in the body, and the money columns keep a sensible width
+   whatever is typed into them. */
+.ds-table { table-layout: fixed; width: 100%; }
+.ds-table th, .ds-table td { overflow: hidden; text-overflow: ellipsis; }
+.ds-table th:nth-child(1), .ds-table td:nth-child(1) { width: 22%; }
+.ds-table th:nth-child(2), .ds-table td:nth-child(2) { width: 13%; }
+.ds-table tfoot td { border-top: 2px solid var(--cream-dark); }
+/* Every money cell right-aligned to the same edge - an input has its own box,
+   so without this the totals read a few pixels adrift of the figures above. */
+.ds-table td.num, .ds-table th.num, .ds-table tfoot td.num { text-align: right; }
+.ds-table input.ds-amt { width: 100%; max-width: 140px; }
+.ds-table select.ds-dh-type { width: 100%; max-width: 90px; }
+
+/* Larger type across the darshan desk. This screen is read by older
+   volunteers, often standing, sometimes at arm's length - so it does not
+   follow the sizes used elsewhere in the app. */
+.darshan-panel .ds-table th {
+    font-size: 14.5px; letter-spacing: .3px; padding-top: 14px; padding-bottom: 14px;
+}
+.darshan-panel .ds-table td { font-size: 19px; padding-top: 16px; padding-bottom: 16px; }
+.darshan-panel .ds-table td strong { font-size: 20px; }
+.darshan-panel .ds-table .badge { font-size: 14px; padding: 6px 13px; }
+.darshan-panel .ds-table tfoot td { font-size: 20px; }
+.darshan-panel .ds-table input.ds-amt {
+    font-size: 21px; padding: 12px 14px; max-width: 165px;
+}
+.darshan-panel .ds-table select.ds-dh-type {
+    font-size: 18px; padding: 11px 10px; max-width: 108px;
+}
+.darshan-panel .ds-name strong { font-size: 23px; }
+.darshan-panel .ds-name small { font-size: 15px; }
+.darshan-panel .ds-seat .seat-cell { font-size: 38px; }
+.darshan-panel .ds-state .badge { font-size: 14px; padding: 7px 14px; }
+.darshan-panel .ds-actions .btn { font-size: 17px; padding: 14px 26px; }
+.darshan-panel .ds-find input { font-size: 17px; padding: 12px 16px; }
+.darshan-panel .ds-q-row .seat-cell { font-size: 18px; min-width: 40px; }
+.darshan-panel .ds-q-row span { font-size: 15px; }
+.darshan-panel .ds-queue-h { font-size: 13px; }
+.darshan-panel .ds-head h3 { font-size: 20px; }
+.darshan-panel .card-header .btn { font-size: 14.5px; }
+.darshan-panel .ds-done strong { font-size: 24px; }
+.darshan-panel .ds-done .seat-cell { font-size: 40px; }
+@media (max-width: 900px) {
+    .darshan-panel .ds-table td { font-size: 17px; }
+    .darshan-panel .ds-seat .seat-cell { font-size: 30px; }
+}
+.ds-table select {
+    padding: 7px 9px; font-family: inherit; font-size: 13px; font-weight: 700;
+    border: 2px solid var(--cream-dark); border-radius: var(--radius-sm);
+    color: var(--brown-deep); background: #fff; outline: none;
+}
+
+/* Darshan takes the whole window, like bulk edit: the sidebar and the pledge
+   list below are both distractions at a moving queue. */
+/* Full screen hides the pledge list underneath - but the clock is a card in
+   that same place, so it has to be named here or it disappears with the list.
+   That is why no clock showed on the darshan screen at all. */
+body.sk-darshan-mode #pageBody > .card:not(.darshan-panel):not(.darshan-watch),
+body.sk-darshan-mode .page-header .btn:not(.btn-lang) { display: none !important; }
+body.sk-darshan-mode .darshan-panel { margin: 0; }
+@media (max-width: 1100px) {
+    .ds-split { grid-template-columns: 1fr; }
+    #dsQueueList { max-height: 220px; }
+}
+.ds-find input:focus { border-color: #14803C; box-shadow: 0 0 0 3px rgba(20,128,60,.12); }
+.ds-who {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin: 14px 0 10px; padding: 12px 16px;
+    background: var(--cream-light); border-radius: 12px;
+}
+.ds-seat { display: flex; align-items: center; }
+.ds-seat .seat-cell { font-size: 26px; }
+.ds-name { display: flex; flex-direction: column; }
+.ds-name strong { font-size: 16px; }
+.ds-name small { color: var(--brown-mid); font-size: 12.5px; }
+.ds-state { margin-left: auto; }
+.ds-table input.ds-amt {
+    width: 130px; padding: 8px 10px; text-align: right;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    border: 2px solid var(--cream-dark); border-radius: var(--radius-sm);
+    color: var(--brown-deep); outline: none;
+}
+.ds-table input.ds-amt:focus { border-color: #14803C; box-shadow: 0 0 0 3px rgba(20,128,60,.12); }
+.ds-actions {
+    display: flex; justify-content: flex-end; gap: 10px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--cream-dark);
+}
+.ds-done {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 14px; padding: 18px 22px;
+    border-radius: 14px; color: #fff;
+    background: linear-gradient(135deg, #0F6B32, #14803C);
+}
+.ds-done .seat-cell { color: #fff; font-size: 30px; }
+.ds-done .darshan-tick { color: #fff; font-size: 15px; }
+.ds-done strong { display: block; font-size: 19px; }
+.ds-done span { display: block; font-size: 13.5px; opacity: .9; }
+.drill.drill-diff { color: var(--danger); }
+@media (max-width: 640px) {
+    .ds-find { flex-wrap: wrap; }
+    .ds-find input { max-width: none; }
+    .ds-state { margin-left: 0; }
+    .ds-actions .btn { flex: 1; justify-content: center; }
+}
+
+/* ==================== THE WATCH ==================== */
+/* Under the desk, in its own card so loading the next member does not touch
+   it. Hidden collapses the face and buttons but leaves the header, so it can
+   be brought back - and it keeps counting while hidden, because hiding it is
+   about the screen and not about the count. */
+.darshan-watch { border: 2px solid var(--cream-dark); margin-top: 14px; }
+.dw-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--cream-dark);
+}
+.dw-head h3 {
+    margin: 0; font-size: 15px; font-weight: 800;
+    color: var(--brown-deep);
+}
+.dw-head h3 i { color: var(--saffron-deep); margin-right: 6px; }
+.dw-toggle { margin-left: auto; }
+.dw-date {
+    font-size: 12px; font-weight: 700;
+    color: var(--brown-mid);
+    background: var(--cream-dark); border-radius: 20px; padding: 3px 11px;
+    font-variant-numeric: tabular-nums;
+}
+/* Big, because it is read from across a desk at a glance and there is
+   nothing else in this card competing for the space. */
+.dw-body { padding: 10px 24px 24px; text-align: center; }
+.dw-time {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: clamp(56px, 11vw, 132px);
+    font-weight: 700; line-height: 1;
+    color: var(--brown-deep);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+.dw-time small {
+    font-size: .3em; font-weight: 800; letter-spacing: 1px;
+    margin-left: 14px; color: var(--saffron-deep);
+    vertical-align: baseline;
+}
+.darshan-watch.hidden .dw-body { display: none; }
+.darshan-watch.hidden { border-color: var(--cream-dark); }
+.darshan-watch.hidden .dw-head { border-bottom: none; }
+@media (max-width: 640px) {
+    .dw-body { padding: 8px 12px 18px; }
+    .dw-time { letter-spacing: 0; }
+}
+
+/* ==================== READING ALOUD, AND THE GUJARATI EDITION ==================== */
+/* Which edition a reader is being handed. The language switch turns the whole
+   dialog over, so it has to be clear whether the PDF turned over with it. */
+.lang-chip {
+    display: inline-block;
+    padding: 1px 8px; border-radius: 20px;
+    background: #EAF7EE; color: #0F6B32;
+    font-size: 10.5px; font-weight: 700;
+}
+.lang-chip.warn { background: var(--cream-dark); color: var(--brown-mid); }
+
+/* The read-aloud strip. Sticky at the foot of the dialog, because the thing
+   it does is invisible - without it there is no way to tell what is being
+   read, or to stop it. */
+.say-bar {
+    position: sticky; bottom: 0; z-index: 6;
+    display: flex; align-items: center; gap: 14px;
+    margin: 16px -22px -22px; padding: 14px 22px;
+    background: linear-gradient(135deg, #23506E, #2E6E96);
+    color: #fff;
+}
+.say-bar > i { font-size: 20px; }
+.say-bar div { flex: 1 1 auto; min-width: 0; }
+.say-bar strong { display: block; font-size: 14px; }
+.say-bar span { display: block; font-size: 12px; opacity: .9; }
+.say-bar .btn {
+    background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.5);
+    color: #fff; flex: 0 0 auto;
+}
+.say-bar .btn:hover { background: rgba(255,255,255,.24); }
+.instr-listen { margin-top: 12px; }
+
+/* The count of change requests waiting, on the Members header button. */
+.mr-badge {
+    display: none;
+    min-width: 20px; margin-left: 7px; padding: 1px 7px;
+    border-radius: 20px; background: var(--danger); color: #fff;
+    font-size: 11.5px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+
+/* ==================== REQUESTS WAITING ==================== */
+/* A request nobody looks at is a member who was ignored, so the menu entry
+   says so from wherever you happen to be working. The pulse is slow and
+   stops the moment the queue is empty - a permanent animation is something
+   people stop seeing. */
+.nav-badge {
+    margin-left: auto;
+    min-width: 20px; padding: 1px 7px;
+    border-radius: 20px; background: var(--danger); color: #fff;
+    font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+@keyframes nudge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212, 56, 13, 0); }
+    50%      { box-shadow: 0 0 0 3px rgba(212, 56, 13, .45); }
+}
+.nav-item.nudge {
+    background: rgba(255, 255, 255, .07);
+}
+.nav-item.nudge .nav-badge {
+    animation: nudge-pulse 1.8s ease-in-out infinite;
+}
+.btn.nudge {
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: nudge-pulse 1.8s ease-in-out infinite;
+}
+.btn.nudge .mr-badge { background: var(--danger); }
+/* Anybody who finds a pulsing button distracting can turn it off at the
+   operating system, and we honour that. */
+@media (prefers-reduced-motion: reduce) {
+    .nav-item.nudge .nav-badge, .btn.nudge { animation: none; }
+}

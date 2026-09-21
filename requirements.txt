@@ -1,0 +1,9 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+Flask-Migrate==4.0.7
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+bcrypt==4.1.2
+gunicorn==22.0.0
+segno==1.6.1

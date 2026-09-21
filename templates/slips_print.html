@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Seat slips {{ year }}</title>
+<style>
+    /* A6 is 105 x 148mm. One slip per page keeps the type large enough to read
+       at arm's length across a hall. */
+    @page { size: 105mm 148mm; margin: 0; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: "Noto Sans Gujarati", "Segoe UI", system-ui, sans-serif;
+        background: #f0ece6;
+        color: #1a0a00;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .slip {
+        width: 105mm;
+        height: 148mm;
+        padding: 7mm 7mm 6mm;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        page-break-after: always;
+        break-after: page;
+        position: relative;
+        overflow: hidden;
+    }
+    .slip:last-child { page-break-after: auto; break-after: auto; }
+
+    /* ---------- masthead ---------- */
+    .org {
+        text-align: center;
+        font-size: 8.5pt;
+        font-weight: 700;
+        letter-spacing: .4pt;
+        text-transform: uppercase;
+        color: #8B1A00;
+    }
+    .title {
+        text-align: center;
+        font-size: 15pt;
+        font-weight: 800;
+        margin-top: 1mm;
+        color: #1a0a00;
+    }
+    .sub {
+        text-align: center;
+        font-size: 8pt;
+        color: #5D4037;
+        margin-top: .5mm;
+        padding-bottom: 2mm;
+        border-bottom: 2px solid #8B1A00;
+    }
+
+    /* ---------- the seat number, the point of the slip ---------- */
+    .seat {
+        margin: 3.5mm 0;
+        text-align: center;
+        border: 2.5px solid #8B1A00;
+        border-radius: 3mm;
+        padding: 2.5mm 2mm;
+        background: #FFF3C4;
+    }
+    .seat-label {
+        font-size: 8.5pt;
+        font-weight: 700;
+        letter-spacing: 1.5pt;
+        text-transform: uppercase;
+        color: #8B1A00;
+    }
+    .seat-no {
+        font-size: 40pt;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 2pt;
+        font-variant-numeric: tabular-nums;
+        color: #8B1A00;
+    }
+
+    /* ---------- details ---------- */
+    .rows { flex: 1 1 auto; }
+    .row {
+        display: flex;
+        align-items: baseline;
+        gap: 2mm;
+        padding: 1.6mm 0;
+        border-bottom: 1px dotted #C9BDB0;
+        font-size: 10pt;
+    }
+    .row:last-child { border-bottom: none; }
+    .k {
+        flex: 0 0 26mm;
+        font-size: 8.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .3pt;
+        color: #5D4037;
+    }
+    .v { flex: 1 1 auto; font-weight: 700; word-break: break-word; }
+    .v.big { font-size: 12pt; }
+    .v.mono { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .5pt; }
+
+    .amount-row { background: #FFF3C4; margin: 1.5mm -2mm 0; padding: 2mm; border-radius: 1.5mm; }
+    .amount-row .v { font-size: 15pt; color: #8B1A00; }
+
+    /* Firms listed when a member has more than one. */
+    .firms { margin-top: 1.5mm; font-size: 8.5pt; }
+    .firms-head {
+        font-size: 8pt; font-weight: 700; text-transform: uppercase;
+        color: #5D4037; margin-bottom: .8mm;
+    }
+    .firm-line { display: flex; gap: 2mm; padding: .6mm 0; }
+    .firm-line .fn {
+        flex: 0 0 9mm; font-weight: 700; color: #8B1A00;
+        font-variant-numeric: tabular-nums;
+    }
+    .firm-line .fname { flex: 1 1 auto; }
+    .firm-line .famt { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    /* ---------- footer ---------- */
+    .foot {
+        margin-top: auto;
+        padding-top: 2mm;
+        border-top: 1px solid #C9BDB0;
+        display: flex;
+        justify-content: space-between;
+        font-size: 7.5pt;
+        color: #5D4037;
+    }
+    .copy-tag {
+        position: absolute;
+        top: 6mm; right: 6mm;
+        font-size: 7pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5pt;
+        color: #8B1A00;
+        border: 1px solid #8B1A00;
+        border-radius: 1mm;
+        padding: .5mm 1.5mm;
+    }
+
+    /* ---------- screen preview ---------- */
+    @media screen {
+        body { padding: 16px; }
+        .toolbar {
+            position: sticky; top: 0; z-index: 10;
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+            background: #fff; border: 1px solid #d9cfc2; border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 16px;
+            font-family: system-ui, sans-serif;
+        }
+        .toolbar h1 { font-size: 16px; margin-right: auto; color: #8B1A00; }
+        .toolbar button {
+            font-family: inherit; font-size: 14px; font-weight: 600;
+            padding: 9px 16px; border-radius: 8px; cursor: pointer;
+            border: 1px solid #8B1A00; background: #8B1A00; color: #fff;
+        }
+        .toolbar button.alt { background: #fff; color: #8B1A00; }
+        .sheet { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+        .slip { box-shadow: 0 2px 10px rgba(0,0,0,.14); border-radius: 2mm; }
+    }
+    @media print {
+        .toolbar { display: none !important; }
+        body { background: #fff; padding: 0; }
+        .sheet { display: block; }
+        .slip { box-shadow: none; border-radius: 0; }
+    }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h1>Seat slips &mdash; {{ year }} &nbsp;<small>({{ slips|length }} check-in{{ '' if slips|length == 1 else 's' }}, {{ slips|length * 2 }} slips)</small></h1>
+    <button onclick="window.print()">Print</button>
+    <button class="alt" onclick="window.close()">Close</button>
+</div>
+
+<div class="sheet">
+{% for s in slips %}
+    {# Two slips per person: the office copy carries the amount, the member's
+       copy does not. Same seat number on both. #}
+    {% for variant in ['office', 'member'] %}
+    <div class="slip">
+        <div class="copy-tag">{{ 'Office Copy' if variant == 'office' else 'Member Copy' }}</div>
+
+        <div class="org">SMVS &mdash; Swaminarayan Mandir Vasna Sanstha</div>
+        <div class="title">Chopda-Pujan {{ year }}</div>
+        <div class="sub">
+            {% if event and event.event_date %}{{ event.event_date.strftime('%d-%m-%Y') }}{% endif %}
+            {% if s.venue %} &bull; {{ s.venue }}{% endif %}
+        </div>
+
+        <div class="seat">
+            <div class="seat-label">Seat No.</div>
+            <div class="seat-no">{{ s.seat_label }}</div>
+        </div>
+
+        <div class="rows">
+            <div class="row">
+                <div class="k">Name</div>
+                <div class="v big">{{ s.member_name }}</div>
+            </div>
+            <div class="row">
+                <div class="k">Member ID</div>
+                <div class="v mono">{{ s.member_id }}</div>
+            </div>
+            {% if s.firm_no %}
+            <div class="row">
+                <div class="k">Firm No.</div>
+                <div class="v mono">{{ '%03d'|format(s.firm_no) }}{% if s.firm_name %} &nbsp;<span style="font-weight:600">{{ s.firm_name }}</span>{% endif %}</div>
+            </div>
+            {% endif %}
+            <div class="row">
+                <div class="k">Pass No.</div>
+                <div class="v mono">{{ s.pass_number or '&mdash;'|safe }}</div>
+            </div>
+            <div class="row">
+                <div class="k">Center</div>
+                <div class="v">{{ s.center_name }}</div>
+            </div>
+
+            {% if variant == 'office' %}
+                {% if s.lines|length > 1 %}
+                <div class="firms">
+                    <div class="firms-head">Sankalp</div>
+                    {% for ln in s.lines %}
+                    <div class="firm-line">
+                        <div class="fn">{{ '%03d'|format(ln.firm_no) if ln.firm_no else '&mdash;'|safe }}</div>
+                        <div class="fname">{{ ln.name }}</div>
+                        <div class="famt">&#8377;{{ '{:,.0f}'.format(ln.amount) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="row amount-row">
+                    <div class="k">Sankalp</div>
+                    <div class="v">&#8377;{{ '{:,.0f}'.format(s.amount) }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="foot">
+            <span>Checked in {{ s.check_in_time }}</span>
+            <span>{{ s.pass_type|capitalize }}</span>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+</div>
+
+{% if not slips %}
+<p style="text-align:center;font-family:system-ui;color:#5D4037;padding:40px">
+    Nothing to print. Check someone in first.
+</p>
+{% endif %}
+
+<script>
+    // Opened with mark=1 from the queue: once the print dialog has been through,
+    // tell the server these are done so they leave the pending list.
+    const AUTO_MARK = {{ 'true' if auto_mark else 'false' }};
+    const IDS = {{ slips | map(attribute='id') | list | tojson }};
+    function markPrinted() {
+        if (!AUTO_MARK || !IDS.length) return;
+        fetch('/api/attendance/slips/printed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ ids: IDS })
+        }).catch(() => {});
+    }
+    window.addEventListener('afterprint', markPrinted);
+    if (IDS.length) {
+        // Give the layout a moment, then offer the print dialog.
+        setTimeout(() => window.print(), 350);
+    }
+</script>
+</body>
+</html>

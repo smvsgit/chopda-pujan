@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMVS Chopda-Pujan {{ year }}</title>
+<!--
+  The member's own page. Deliberately standalone: no menu, no sign-in, no app
+  shell. Whoever opens this arrived from a link in a message, probably on a
+  phone, and only has one job - check the firm names and correct them. Every
+  extra thing on the page is something to get wrong.
+
+  Its own stylesheet rather than the app's, because that one assumes a signed-in
+  layout, and this page has to render before anybody has proved who they are.
+-->
+<style>
+  :root {
+    --red: #8B1A00; --orange: #D4560D; --brown: #3B2314; --mid: #6B5140;
+    --cream: #FDF8F0; --line: #EADFC8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 0 40px;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #FBF6EC; color: var(--brown); font-size: 16px; line-height: 1.55;
+  }
+  .bar {
+    background: var(--red); color: #fff; padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .bar span { font-size: 19px; font-weight: 700; }
+  .langsw {
+    flex: 0 0 auto; color: #fff; text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.55); border-radius: 20px;
+    padding: 5px 14px;
+  }
+  .langsw:hover { background: rgba(255,255,255,.14); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 18px 16px; }
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; margin-bottom: 16px;
+  }
+  h2 { font-size: 18px; margin: 0 0 4px; color: var(--red); }
+  .sub { color: var(--mid); font-size: 14px; margin: 0 0 14px; }
+  .who { background: var(--cream); border-radius: 10px; padding: 12px 14px;
+         margin-bottom: 16px; font-size: 15px; }
+  .who b { font-size: 17px; }
+  .who small { display: block; color: var(--mid); }
+  label.fl { display: block; font-size: 13px; font-weight: 600;
+             color: var(--mid); margin: 14px 0 5px; }
+  input[type=text], input[type=email], select {
+    width: 100%; padding: 13px 14px; font-size: 16px; font-family: inherit;
+    color: var(--brown); background: #fff;
+    border: 2px solid var(--line); border-radius: 10px; outline: none;
+  }
+  input[type=text]:focus, input[type=email]:focus, select:focus { border-color: var(--orange); }
+  .row { display: flex; gap: 8px; align-items: flex-end; }
+  .row select { flex: 0 0 40%; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 20px; font-size: 16px; font-weight: 700; font-family: inherit;
+    border-radius: 10px; border: 2px solid var(--line); background: #fff;
+    color: var(--brown); cursor: pointer; text-decoration: none;
+  }
+  .btn.main { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn.wide { width: 100%; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .actions { display: flex; gap: 10px; margin-top: 20px; }
+  .actions .btn { flex: 1; }
+  .note { background: var(--cream); border-left: 4px solid var(--orange);
+          border-radius: 8px; padding: 12px 14px; font-size: 14px;
+          color: var(--mid); margin-top: 14px; }
+  .ok { background: #EAF7EE; border-left-color: #0F6B32; color: #0F6B32;
+        font-weight: 600; }
+  .bad { background: #FDECEA; border-left-color: #C0392B; color: #A5281B; }
+  .foot { text-align: center; color: var(--mid); font-size: 13px; padding: 8px 16px; }
+  .del { flex: 0 0 auto; padding: 13px 15px; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <span>SMVS Chopda-Pujan {{ year }}</span>
+  {# The switch belongs where a reader looks for it, not at the foot of the
+     page after everything they came to do. #}
+  <a class="langsw" href="?lang={{ 'en' if lang == 'gu' else 'gu' }}"
+     >{{ 'English' if lang == 'gu' else 'ગુજરાતી' }}</a>
+</div>
+
+<div class="wrap">
+
+{% if error == 'bad_link' %}
+  <div class="card">
+    <h2>{% if lang == 'gu' %}આ લિંક ચાલતી નથી{% else %}This link does not work{% endif %}</h2>
+    <p class="sub">
+      {% if lang == 'gu' %}
+        લિંક જૂની થઈ ગઈ છે અથવા અધૂરી કોપી થઈ છે. કૃપા કરી આપને મળેલા સંદેશામાંથી
+        આખી લિંક ફરી ખોલો.
+      {% else %}
+        The link has expired, or was copied incompletely. Please open the full
+        link from the message you were sent.
+      {% endif %}
+    </p>
+  </div>
+
+{% elif error %}
+  <div class="card">
+    <h2>{% if lang == 'gu' %}હાલ ફેરફાર બંધ છે{% else %}Changes are closed{% endif %}</h2>
+    <p class="sub">
+      {% if lang == 'gu' %}
+        પેઢીની વિગત ઓનલાઈન સુધારવાનો સમય પૂરો થયો છે.
+        {% if contact %}કૃપા કરી {{ contact }} ઉપર સંપર્ક કરો.{% endif %}
+      {% else %}
+        The window for correcting firm details online has closed.
+        {% if contact %}Please ring {{ contact }}.{% endif %}
+      {% endif %}
+    </p>
+  </div>
+
+{% else %}
+  <div class="card">
+    <div class="who">
+      <b>{{ member.display_name }}</b>
+      <small>
+        {% if member.member_code %}{% if lang == 'gu' %}મેમ્બર ID{% else %}Member ID{% endif %}: {{ member.member_code }}{% endif %}
+        {% if member.center %} &bull; {{ member.center.label }}{% endif %}
+      </small>
+      {# The number on record, so a wrong one is noticed even though it is not
+         editable here - it is what the centre would ring. #}
+      <small>
+        {% if lang == 'gu' %}મોબાઈલ{% else %}Mobile{% endif %}:
+        {% if member.mobile %}{{ member.mobile }}{% else %}&mdash;{% endif %}
+      </small>
+    </div>
+
+    <h2>{% if lang == 'gu' %}આપની હાલની પેઢી / કંપનીના નામ તપાસો{% else %}Check your existing firm and company names{% endif %}</h2>
+    <p class="sub">
+      {% if lang == 'gu' %}
+        નામમાં સુધારો હોય તો સીધો લખી દો, અને નવી પેઢી ઉમેરવી હોય તો નીચે ઉમેરો.
+        પછી સેવ કરો.
+      {% else %}
+        Correct any name straight in the box, and add a new firm below if you
+        have one. Then save.
+      {% endif %}
+    </p>
+
+    <div id="firms">
+      {% for e in entities %}
+        <label class="fl" for="f{{ e.id }}">
+          {% if e.entity_type == 'company' %}{% if lang == 'gu' %}કંપની{% else %}Company{% endif %}
+          {% else %}{% if lang == 'gu' %}પેઢી{% else %}Firm{% endif %}{% endif %} {{ loop.index }}
+        </label>
+        <input type="text" id="f{{ e.id }}" data-id="{{ e.id }}"
+               class="ex" value="{{ e.name }}" maxlength="200"
+               data-original="{{ e.name }}">
+      {% endfor %}
+      {% if not entities %}
+        <p class="sub">
+          {% if lang == 'gu' %}આપના નામે હાલ કોઈ પેઢી નોંધાયેલી નથી.
+          {% else %}No firm is recorded against your name yet.{% endif %}
+        </p>
+      {% endif %}
+    </div>
+
+    {# Asked for because a member with no address on record can never be sent
+       anything - and the message asking for it is the one they cannot get. #}
+    <label class="fl" for="mEmail">
+      {% if member.email %}
+        {% if lang == 'gu' %}આપનું ઈમેલ{% else %}Your email address{% endif %}
+      {% else %}
+        {% if lang == 'gu' %}ઈમેલ ઉમેરો (ન હોય તો){% else %}Add your email address{% endif %}
+      {% endif %}
+    </label>
+    <input type="email" id="mEmail" maxlength="200" inputmode="email"
+           autocomplete="email" value="{{ member.email or '' }}"
+           data-original="{{ member.email or '' }}"
+           placeholder="{% if lang == 'gu' %}name@example.com{% else %}name@example.com{% endif %}">
+
+    <label class="fl">{% if lang == 'gu' %}નવી પેઢી કે કંપની ઉમેરો{% else %}Add a firm or company{% endif %}</label>
+    <div id="adds"></div>
+    <button type="button" class="btn wide" id="addBtn" style="margin-top:10px">
+      + {% if lang == 'gu' %}ઉમેરો{% else %}Add{% endif %}
+    </button>
+
+    <div class="actions">
+      <button type="button" class="btn main" id="saveBtn">
+        {% if lang == 'gu' %}સેવ કરો{% else %}Save{% endif %}
+      </button>
+    </div>
+
+    <div id="msg"></div>
+
+    {% if until %}
+      <div class="note">
+        {% if lang == 'gu' %}
+          {{ until.strftime('%d-%m-%Y') }} સુધી આ પાનું ખુલ્લું છે.
+        {% else %}
+          This page is open until {{ until.strftime('%d-%m-%Y') }}.
+        {% endif %}
+      </div>
+    {% endif %}
+    <div class="note">
+      {% if lang == 'gu' %}
+        સંકલ્પની રકમ અહીંથી બદલાતી નથી — તે પૂજન વખતે રૂબરૂ નોંધાય છે.
+        {% if contact %}કોઈ પ્રશ્ન હોય તો {{ contact }} ઉપર સંપર્ક કરો.{% endif %}
+      {% else %}
+        Sankalp amounts cannot be changed here &mdash; they are confirmed in
+        person at the pujan.
+        {% if contact %}For anything else, ring {{ contact }}.{% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+  <div class="foot">
+    {% if lang == 'gu' %}જય સ્વામિનારાયણ{% else %}Jay Swaminarayan{% endif %}
+  </div>
+</div>
+
+{% if not error %}
+<script>
+(function () {
+  var LANG = {{ ('gu' if lang == 'gu' else 'en') | tojson }};
+  var T = {
+    en: { added: 'Saved. Thank you.', pending: 'Sent for checking. Thank you.',
+          nothing: 'Nothing was changed.', fail: 'Could not save. Please try again.',
+          many: 'Too many attempts. Please try again in a few minutes.',
+          closed: 'Changes are closed now.', firm: 'Firm', company: 'Company',
+          name: 'Name', remove: 'Remove',
+          bademail: 'That does not look like an email address.' },
+    gu: { added: 'સેવ થઈ ગયું. આભાર.', pending: 'તપાસ માટે મોકલાયું. આભાર.',
+          nothing: 'કંઈ બદલાયું નથી.', fail: 'સેવ થઈ શક્યું નથી. ફરી પ્રયત્ન કરો.',
+          many: 'બહુ પ્રયત્ન થયા. થોડી વારે ફરી પ્રયત્ન કરો.',
+          closed: 'હાલ ફેરફાર બંધ છે.', firm: 'પેઢી', company: 'કંપની',
+          name: 'નામ', remove: 'કાઢો',
+          bademail: 'આ ઈમેલ સરનામું બરાબર લાગતું નથી.' }
+  }[LANG];
+
+  var adds = document.getElementById('adds');
+  var msg = document.getElementById('msg');
+
+  document.getElementById('addBtn').addEventListener('click', function () {
+    var row = document.createElement('div');
+    row.className = 'row';
+    row.style.marginTop = '8px';
+    row.innerHTML =
+      '<select class="ntype"><option value="firm">' + T.firm + '</option>'
+      + '<option value="company">' + T.company + '</option></select>'
+      + '<input type="text" class="nname" maxlength="200" placeholder="' + T.name + '">'
+      + '<button type="button" class="btn del">&times;</button>';
+    row.querySelector('.del').addEventListener('click', function () { row.remove(); });
+    adds.appendChild(row);
+    row.querySelector('.nname').focus();
+  });
+
+  function show(cls, text) {
+    msg.innerHTML = '<div class="note ' + cls + '">' + text + '</div>';
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', async function () {
+    var btn = this;
+    // Only what actually changed goes up. Sending every box back would make
+    // an untouched name look like an edit in the review queue.
+    var edits = [];
+    document.querySelectorAll('#firms input.ex').forEach(function (el) {
+      var v = el.value.trim();
+      if (v && v !== el.dataset.original) edits.push({ id: +el.dataset.id, name: v });
+    });
+    var newRows = [];
+    adds.querySelectorAll('.row').forEach(function (r) {
+      var v = r.querySelector('.nname').value.trim();
+      if (v) newRows.push({ name: v, entity_type: r.querySelector('.ntype').value });
+    });
+    var emailEl = document.getElementById('mEmail');
+    var email = emailEl ? emailEl.value.trim() : '';
+    var emailChanged = emailEl && email !== emailEl.dataset.original;
+    if (!edits.length && !newRows.length && !emailChanged) {
+      show('', T.nothing); return;
+    }
+
+    btn.disabled = true;
+    try {
+      var r = await fetch(window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ edits: edits, adds: newRows,
+                               email: emailChanged ? email : '' })
+      });
+      var d = await r.json().catch(function () { return {}; });
+      if (r.status === 429) { show('bad', T.many); btn.disabled = false; return; }
+      if (r.status === 403) { show('bad', T.closed); return; }
+      if (d && d.error === 'bad_email') {
+        show('bad', T.bademail); btn.disabled = false; return;
+      }
+      if (!r.ok) { show('bad', T.fail); btn.disabled = false; return; }
+      show('ok', d.pending ? T.pending : T.added);
+      // Reloading would lose the message, so the boxes are simply settled to
+      // what was just saved.
+      document.querySelectorAll('#firms input.ex').forEach(function (el) {
+        el.dataset.original = el.value.trim();
+      });
+      if (emailEl) emailEl.dataset.original = email;
+      adds.innerHTML = '';
+      setTimeout(function () { btn.disabled = false; }, 1200);
+    } catch (e) {
+      show('bad', T.fail);
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+{% endif %}
+</body>
+</html>

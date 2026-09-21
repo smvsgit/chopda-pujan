@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passes {{ year }} &mdash; 4 per A4</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+    /* Each band is 8.2 x 2.9 in. Four stack to 11.6in, which fits an A4 sheet
+       (8.27 x 11.69in) with a whisker to spare - so the paper is A4 and the
+       bands are cut apart afterwards. */
+    @page { size: A4 portrait; margin: 0.04in 0.035in; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: "Noto Sans Gujarati", "Segoe UI", system-ui, sans-serif;
+        background: #f0ece6;
+        color: #1a0a00;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .sheet-page { width: 8.2in; }
+    .band {
+        width: 8.2in;
+        height: 2.9in;
+        padding: 0.16in 0.2in;
+        background: #fff;
+        display: flex;
+        align-items: stretch;
+        gap: 0.2in;
+        position: relative;
+        overflow: hidden;
+        border-left: 0.08in solid #8B1A00;
+        border-bottom: 1px dashed #b9aa99;   /* the cutting line */
+    }
+    .band:last-child { border-bottom: none; }
+
+    /* ---------- left: brand, QR centred, then the two numbers ---------- */
+    .left {
+        flex: 0 0 1.5in;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-right: 1.5px dashed #C9BDB0;
+        padding-right: 0.14in;
+    }
+    .org { font-size: 14pt; font-weight: 800; letter-spacing: .5pt; color: #8B1A00; }
+    .event { font-size: 7.5pt; color: #5D4037; text-align: center; }
+
+    /* Centred in the space between the brand and the number boxes. */
+    /* Pass number above, QR in the middle taking the slack, seat below. The
+       QR was small with dead space either side of it; it now fills the space. */
+    .qr {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2pt 0;
+    }
+    .qr canvas, .qr img { width: 1.12in !important; height: 1.12in !important; display: block; }
+
+    .numbox {
+        width: 100%;
+        border: 1.5px solid #8B1A00;
+        border-radius: 0.05in;
+        padding: 2pt 4pt;
+        text-align: center;
+        background: #FFF3C4;
+    }
+    .numbox.pass { margin-top: 2pt; }
+    .numbox.seat { background: #fff; }
+    .numbox .lbl {
+        font-size: 6.5pt; font-weight: 700; letter-spacing: .5pt;
+        text-transform: uppercase; color: #8B1A00; white-space: nowrap;
+    }
+    .numbox .val {
+        font-size: 15pt; font-weight: 800; line-height: 1.1;
+        letter-spacing: .5pt; font-variant-numeric: tabular-nums; color: #8B1A00;
+    }
+    .numbox .val.empty { font-size: 7.5pt; color: #9c8f82; letter-spacing: 0; }
+
+    /* ---------- right: who, then the sankalp table ---------- */
+    .mid { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; }
+    .name {
+        font-size: 14pt; font-weight: 800; line-height: 1.12;
+        text-transform: uppercase; word-break: break-word;
+    }
+    /* One line: ID, centre and mobile, then last year, pending and dharmada.
+       Sized so all six fit across the band without wrapping. */
+    .meta {
+        font-size: 8.5pt; color: #5D4037; margin-top: 1.5pt;
+        display: flex; align-items: center; gap: 5pt;
+        white-space: nowrap; overflow: hidden;
+    }
+    .meta b { color: #1a0a00; }
+    .meta .sep { color: #C9BDB0; }
+    .hist { display: flex; align-items: center; gap: 5pt; margin-left: 3pt; }
+    .hist .lys { font-weight: 700; color: #1a0a00; }
+    .hist .pend {
+        font-weight: 800; color: #8B1A00;
+        background: #FFF3C4; border: 1px solid #E0C86A;
+        padding: .5pt 4pt; border-radius: 2.5pt;
+    }
+    /* Dharmada sits with the other money figures, in its own quiet box. */
+    .hist .dh {
+        font-weight: 800; color: #1a4d2e;
+        background: #E7F6EC; border: 1px solid #A8D5BA;
+        padding: .5pt 4pt; border-radius: 2.5pt;
+    }
+
+    /* Seven lines: a header, five entries, a total. */
+    .sk-table { width: 100%; margin-top: 5pt; border-collapse: collapse; table-layout: fixed; }
+    .sk-table th, .sk-table td {
+        /* Taller rows and larger type - there was unused space below the
+           total, and these are read at arm's length. */
+        padding: 3.4pt 5pt;
+        font-size: 11pt;
+        text-align: left;
+        border-bottom: 1px dotted #C9BDB0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .sk-table th {
+        font-size: 8pt; font-weight: 700; letter-spacing: .3pt;
+        text-transform: uppercase; color: #5D4037;
+        border-bottom: 1.2px solid #8B1A00;
+        background: #FBF6EE;
+        padding-top: 2.4pt; padding-bottom: 2.4pt;
+    }
+    /* A rule down the left of the amount column, on both copies, so the name
+       and the figure read as two separate fields. */
+    .sk-table .c-amt {
+        width: 1.5in; text-align: right;
+        font-variant-numeric: tabular-nums; font-weight: 700;
+        border-left: 1px solid #C9BDB0;
+    }
+    .sk-table th.c-amt { border-left: 1px solid #8B1A00; }
+    .sk-table tr.total td.c-amt { border-left: 1px solid #8B1A00; }
+    .sk-table td.c-name { font-weight: 600; }
+    .sk-table tr.blank td { color: #fff; }            /* holds the row height */
+    .sk-table tr.total td {
+        border-bottom: none;
+        border-top: 1.4px solid #8B1A00;
+        font-size: 12pt; font-weight: 800;
+        padding-top: 4pt;
+    }
+    .sk-table tr.total td.c-amt { color: #8B1A00; font-size: 13pt; }
+
+    .type-tag {
+        position: absolute; top: 0.13in; right: 0.2in;
+        background: #8B1A00; color: #fff;
+        font-size: 7.5pt; font-weight: 700; letter-spacing: .7pt;
+        text-transform: uppercase; padding: 1.5pt 8pt; border-radius: 8pt;
+    }
+    /* Centred along the bottom of the band rather than tucked in the corner,
+       so whoever is sorting the pile can read it at a glance. */
+    .copy-tag {
+        position: absolute; bottom: 0.06in; left: 0; right: 0;
+        text-align: center;
+        font-size: 6pt; font-weight: 700; letter-spacing: 1pt;
+        text-transform: uppercase; color: #a5988a;
+    }
+
+    /* ---------- screen preview ---------- */
+    @media screen {
+        body { padding: 14px; }
+        .toolbar {
+            position: sticky; top: 0; z-index: 10;
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+            background: #fff; border: 1px solid #d9cfc2; border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 14px; font-family: system-ui, sans-serif;
+        }
+        .toolbar h1 { font-size: 15px; margin-right: auto; color: #8B1A00; }
+        .toolbar button {
+            font-family: inherit; font-size: 14px; font-weight: 600;
+            padding: 9px 16px; border-radius: 8px; cursor: pointer;
+            border: 1px solid #8B1A00; background: #8B1A00; color: #fff;
+        }
+        .toolbar button.alt { background: #fff; color: #8B1A00; }
+
+        /* A visible A4 sheet, so the preview is what the printer will do. */
+        .sheet { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+        .sheet-page {
+            width: 8.27in;
+            min-height: 11.69in;
+            padding: 0.04in 0.035in;
+            background: #fff;
+            box-shadow: 0 2px 14px rgba(0,0,0,.16);
+        }
+        .page-mark {
+            font-family: system-ui, sans-serif; font-size: 12px; color: #8b7d6d;
+            text-align: center; margin-bottom: -8px;
+        }
+    }
+    @media print {
+        .toolbar, .page-mark { display: none !important; }
+        body { background: #fff; padding: 0; }
+        .sheet { display: block; }
+        .sheet-page {
+            box-shadow: none; padding: 0; min-height: 0;
+            page-break-after: always; break-after: page;
+        }
+        .sheet-page:last-child { page-break-after: auto; break-after: auto; }
+    }
+</style>
+</head>
+<body>
+
+{% macro band(p, copy, year) %}
+{#- One band. `copy` is 'member' or 'office'. The member copy lists the firm
+    names but no amounts at all. -#}
+{% set lines = p.sankalp_lines or [] %}
+{% set shown = lines[:5] if lines|length <= 5 else lines[:4] %}
+{% set overflow = 1 if lines|length > 5 else 0 %}
+<div class="band">
+    {# A General pass needs no label; only Yajman and Guruji are called out. #}
+    {% if p.pass_type and p.pass_type|lower != 'general' %}
+    <div class="type-tag">{{ p.pass_type }}</div>
+    {% endif %}
+
+    <div class="left">
+        <div class="org">SMVS</div>
+        <div class="event">Chopda-Pujan {{ year }}</div>
+        <div class="numbox pass">
+            <div class="lbl">Pass No.</div>
+            <div class="val">{{ p.pass_number }}</div>
+        </div>
+        <div class="qr" data-code="{{ p.pass_number }}"></div>
+        <div class="numbox seat">
+            <div class="lbl">Seat No.</div>
+            {% if p.seat_label %}
+            <div class="val">{{ p.seat_label }}</div>
+            {% else %}
+            <div class="val empty">on check-in</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mid">
+        <div class="name">{{ p.member_name }}</div>
+        <div class="meta">
+            <b>{{ p.member_code }}</b>
+            {% if p.center_name %}<span class="sep">&bull;</span> {{ p.center_name }}{% endif %}
+            {% if p.member_mobile %}<span class="sep">&bull;</span> {{ p.member_mobile }}{% endif %}
+            {% if copy == 'office' %}<span class="sep">&bull;</span>
+            {# Last year's pledge and what is still outstanding, so the desk can
+               see the history without looking anything up. Office copy only. #}
+            <span class="hist">
+                <span class="lys">L.Y.S &mdash; {{ '{:,.0f}'.format(p.last_year_amount or 0) }}/-</span>
+                <span class="pend">Pending: {{ '{:,.0f}'.format(p.pending_amount or 0) }}/-</span>
+                {% if p.dharmada_type or p.dharmada_amount %}
+                <span class="dh">D: {{ p.dharmada_type or '—' }} &mdash; {{ '{:,.0f}'.format(p.dharmada_amount or 0) }}/-</span>
+                {% endif %}
+            </span>
+            {% endif %}
+        </div>
+
+        <table class="sk-table">
+            <thead>
+                <tr>
+                    <th>Firm / Company Name</th>
+                    <th class="c-amt">Sankalp Amt.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ln in shown %}
+                <tr>
+                    <td class="c-name">{{ ln.entity_name or ln.sankalp_name }}{% if ln.person_name %} &mdash; {{ ln.person_name }}{% endif %}</td>
+                    <td class="c-amt">{% if copy == 'office' and ln.amount %}&#8377;{{ '{:,.0f}'.format(ln.amount) }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                {% if overflow %}
+                <tr>
+                    <td class="c-name">+ {{ lines|length - 4 }} more</td>
+                    <td class="c-amt">{% if copy == 'office' %}&#8377;{{ '{:,.0f}'.format(lines[4:] | map(attribute='amount') | select | sum) }}{% endif %}</td>
+                </tr>
+                {% endif %}
+                {# Pad so the total always lands on line seven. #}
+                {% for _ in range(5 - shown|length - overflow) %}
+                <tr class="blank"><td>&nbsp;</td><td class="c-amt">&nbsp;</td></tr>
+                {% endfor %}
+                <tr class="total">
+                    <td>Total Sankalp</td>
+                    <td class="c-amt">{% if copy == 'office' %}&#8377;{{ '{:,.0f}'.format(lines | map(attribute='amount') | select | sum) }}{% endif %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="copy-tag">{{ 'Member copy' if copy == 'member' else 'Office copy' }}</div>
+</div>
+{% endmacro %}
+
+{# Only the copies this user is allowed to print. #}
+{% set wanted = copies if copies is defined and copies else ['member', 'office'] %}
+{% set bands = [] %}
+{% for p in passes %}
+    {% for cp in wanted %}
+        {% set _ = bands.append((p, cp)) %}
+    {% endfor %}
+{% endfor %}
+{% set sheets = ((bands|length + 3) // 4) %}
+
+<div class="toolbar">
+    <h1>Passes &mdash; {{ year }}
+        &nbsp;<small>{{ passes|length }} pass{{ '' if passes|length == 1 else 'es' }}
+        &times; {{ wanted|length }} cop{{ 'y' if wanted|length == 1 else 'ies' }} ({{ wanted|join(', ') }})
+        = {{ bands|length }} band{{ '' if bands|length == 1 else 's' }} &bull; 4 per A4 &bull;
+        {{ sheets }} sheet{{ '' if sheets == 1 else 's' }}</small>
+    </h1>
+    <button onclick="window.print()">Print</button>
+    <button class="alt" onclick="window.close()">Close</button>
+</div>
+
+<div class="sheet">
+{% for chunk in bands | batch(4) %}
+    <div class="page-mark">A4 sheet {{ loop.index }} of {{ sheets }}</div>
+    <div class="sheet-page">
+        {% for item in chunk %}{{ band(item[0], item[1], year) }}{% endfor %}
+    </div>
+{% endfor %}
+</div>
+
+{% if not passes %}
+<p style="text-align:center;font-family:system-ui;color:#5D4037;padding:40px">
+    No passes to print for {{ year }}.
+</p>
+{% endif %}
+
+<script>
+    document.querySelectorAll('.qr').forEach(function (el) {
+        var code = el.dataset.code;
+        if (!code || typeof QRCode === 'undefined') return;
+        new QRCode(el, {
+            text: code, width: 76, height: 76,
+            colorDark: '#1a0a00', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    });
+</script>
+</body>
+</html>

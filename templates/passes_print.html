@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMVS Passes {{ year }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Passes are sized in millimetres against A4, not in pixels against a
+           screen. Three across, five down, ten per page. */
+        @page { size: A4; margin: 8mm; }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --saffron-deep: #8B1A00; --saffron: #D4380D;
+            --gold: #DAA520; --gold-pale: #FFF3C4;
+            --cream: #FFFAF0; --brown: #3E2723; --brown-mid: #5D4037;
+        }
+        body {
+            font-family: 'Noto Sans Gujarati', sans-serif;
+            background: #E9E4DC;
+            color: var(--brown);
+            padding: 16px;
+        }
+
+        .toolbar {
+            max-width: 200mm; margin: 0 auto 16px; display: flex;
+            align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .toolbar h1 { font-size: 18px; font-weight: 800; color: var(--saffron-deep); margin-right: auto; }
+        .toolbar button {
+            font-family: inherit; font-size: 14px; font-weight: 600;
+            padding: 9px 18px; border-radius: 9px; border: 2px solid var(--saffron);
+            background: var(--saffron); color: #fff; cursor: pointer;
+        }
+        .toolbar button.ghost { background: transparent; color: var(--saffron-deep); }
+        .toolbar button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+        .count { font-size: 13px; color: var(--brown-mid); }
+
+        .sheet {
+            max-width: 200mm; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm;
+        }
+
+        .pass {
+            position: relative;
+            min-height: 58mm;
+            padding: 4mm 4mm 3mm;
+            border: 0.6mm solid var(--saffron-deep);
+            border-radius: 3mm;
+            background: linear-gradient(160deg, var(--cream), #F7EBD8);
+            display: flex; flex-direction: column;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        .pass::before {
+            content: ''; position: absolute; inset: 1.2mm;
+            border: 0.3mm dashed var(--gold); border-radius: 2mm; pointer-events: none;
+        }
+        .pass-top { display: flex; align-items: flex-start; gap: 2mm; }
+        .pass-org { font-size: 11pt; font-weight: 800; color: var(--saffron-deep); letter-spacing: .5pt; line-height: 1; }
+        .pass-event { font-size: 6.5pt; color: var(--brown-mid); margin-top: .6mm; }
+        .pass-type {
+            margin-left: auto; font-size: 6.5pt; font-weight: 700;
+            padding: .8mm 2mm; border-radius: 6mm; color: #fff; white-space: nowrap;
+        }
+        .pass-type.yajman  { background: var(--saffron-deep); }
+        .pass-type.guruji  { background: var(--gold); color: #3E2723; }
+        .pass-type.general { background: var(--brown-mid); }
+
+        .pass-mid { display: flex; align-items: center; gap: 2.5mm; margin-top: 2.5mm; flex: 1; }
+        .pass-qr { width: 19mm; height: 19mm; flex-shrink: 0; background: #fff; padding: 1mm; border-radius: 1mm; }
+        .pass-qr img, .pass-qr canvas { width: 100% !important; height: 100% !important; display: block; }
+        .pass-info { min-width: 0; }
+        .pass-number { font-size: 15pt; font-weight: 800; color: var(--saffron-deep); letter-spacing: 1pt; line-height: 1.1; }
+        .pass-name { font-size: 8.5pt; font-weight: 600; margin-top: 1mm; overflow-wrap: anywhere; }
+        .pass-center { font-size: 7pt; color: var(--brown-mid); margin-top: .5mm; }
+
+        .pass-lines {
+            margin-top: 1.5mm;
+            padding-top: 1.2mm;
+            border-top: 0.3mm dotted rgba(139, 26, 0, .3);
+        }
+        .pass-line {
+            display: flex; justify-content: space-between; gap: 2mm;
+            font-size: 6.5pt; line-height: 1.5;
+        }
+        .pl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pl-amt  { font-weight: 700; color: var(--saffron-deep); white-space: nowrap; }
+        .pass-line.more { color: var(--brown-mid); font-style: italic; }
+
+        .pass-foot {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 6pt; color: var(--brown-mid);
+            border-top: 0.3mm solid rgba(139, 26, 0, .25); padding-top: 1.2mm; margin-top: 1.5mm;
+        }
+        .empty { max-width: 200mm; margin: 40px auto; text-align: center; color: var(--brown-mid); }
+
+        @media print {
+            body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .toolbar { display: none; }
+            .sheet { max-width: none; gap: 3mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <h1>Chopda-Pujan {{ year }} &mdash; Passes</h1>
+        <span class="count">{{ passes|length }} pass(es)</span>
+        <button type="button" onclick="window.print()">Print</button>
+        <button type="button" class="ghost" onclick="window.close()">Close</button>
+    </div>
+
+    {% if passes %}
+    <div class="sheet">
+        {% for p in passes %}
+        <div class="pass">
+            <div class="pass-top">
+                <div>
+                    <div class="pass-org">SMVS</div>
+                    <div class="pass-event">Chopda-Pujan {{ p.pujan_year }}</div>
+                </div>
+                <div class="pass-type {{ p.pass_type }}">{{ {'yajman':'YAJMAN','guruji':'GURUJI','general':'GENERAL'}.get(p.pass_type, p.pass_type|upper) }}</div>
+            </div>
+            <div class="pass-mid">
+                <div class="pass-qr" data-code="{{ p.pass_number }}"></div>
+                <div class="pass-info">
+                    <div class="pass-number">{{ p.pass_number }}</div>
+                    <div class="pass-name">{{ p.member_name }}</div>
+                    <div class="pass-center">{{ p.member_code }} &bull; {{ p.center_name }}</div>
+                </div>
+            </div>
+            {% if p.sankalp_lines %}
+            <div class="pass-lines">
+                {% for l in p.sankalp_lines[:3] %}
+                <div class="pass-line">
+                    <span class="pl-name">{% if l.entity_name %}{{ l.entity_name }}{% else %}{{ l.sankalp_name }}{% endif %}{% if l.person_name %} &mdash; {{ l.person_name }}{% if l.person_code %} <b>[{{ l.person_code }}]</b>{% endif %}{% endif %}</span>
+                    {# Left off for a handout copy (money=0), and absent for
+                       someone registered at the door with no pledge yet. #}
+                    {% if (show_money is not defined or show_money) and l.amount %}
+                    <span class="pl-amt">&#8377;{{ '{:,.0f}'.format(l.amount) }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% if p.sankalp_lines|length > 3 %}
+                <div class="pass-line more">+{{ p.sankalp_lines|length - 3 }} more</div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <div class="pass-foot">
+                <span>જય સ્વામિનારાયણ</span>
+                <span>Valid for {{ p.pujan_year }} only</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">No passes match this selection.</p>
+    {% endif %}
+
+    <script>
+        // QR encodes the pass number, which is what the check-in scanner reads.
+        // If the library fails to load the pass is still valid: the number is
+        // printed large enough to type.
+        if (typeof QRCode !== 'undefined') {
+            document.querySelectorAll('.pass-qr').forEach(el => {
+                new QRCode(el, {
+                    text: el.dataset.code,
+                    width: 128, height: 128,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            });
+        }
+    </script>
+</body>
+</html>
